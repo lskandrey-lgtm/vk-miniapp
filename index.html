@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка на доставку</title>
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: #f5f5f5;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4a76a8;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .required::after {
+            content: " *";
+            color: #e64646;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #4a76a8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #3d628a;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+
+        .message.warning {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ff9800;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .photo-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .photo-upload:hover {
+            border-color: #4a76a8;
+            background: #f8f9fa;
+        }
+
+        .photo-upload input {
+            display: none;
+        }
+
+        .photo-preview {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .photo-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Подать заявку на доставку</h1>
+        
+        <div id="message" class="message"></div>
+
+        <form id="submissionForm">
+            <div class="form-group">
+                <label class="required">Тип заявки</label>
+                <select id="type" required>
+                    <option value="">Выберите тип</option>
+                    <option value="Передать">Передать</option>
+                    <option value="Перевезти">Перевезти</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="required">Откуда (город)</label>
+                <input type="text" id="fromCity" placeholder="Москва" required>
+            </div>
+
+            <div class="form-group">
+                <label class="required">Куда (город)</label>
+                <input type="text" id="toCity" placeholder="Санкт-Петербург" required>
+            </div>
+
+            <div class="form-group">
+                <label>Дата</label>
+                <input type="date" id="date">
+                <div class="hint">Не обязательно</div>
+            </div>
+
+            <div class="form-group">
+                <label class="required">Что нужно передать/перевезти</label>
+                <select id="what" required>
+                    <option value="">Выберите категорию</option>
+                    <option value="Посылка">Посылка</option>
+                    <option value="Документы">Документы</option>
+                    <option value="Животные">Животные</option>
+                    <option value="Вещи">Вещи</option>
+                    <option value="Другое">Другое</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Вес / габариты</label>
+                <input type="text" id="weight" placeholder="5 кг, небольшая коробка">
+                <div class="hint">Не обязательно</div>
+            </div>
+
+            <div class="form-group">
+                <label>Комментарий</label>
+                <textarea id="comment" placeholder="Дополнительная информация..."></textarea>
+                <div class="hint">Не обязательно</div>
+            </div>
+
+            <div class="form-group">
+                <label>Контакт (телефон / Telegram)</label>
+                <input type="text" id="contact" placeholder="+7 900 123-45-67 или @username">
+                <div class="hint">Не обязательно, но рекомендуется</div>
+            </div>
+
+            <div class="form-group">
+                <label>Фото (если есть)</label>
+                <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
+                    <p>📷 Нажмите для загрузки фото</p>
+                    <div class="hint">Заявки с фото проходят модерацию</div>
+                    <input type="file" id="photoInput" accept="image/*" multiple>
+                </div>
+                <div id="photoPreview" class="photo-preview"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Отправить заявку</button>
+        </form>
+    </div>
+
+    <script>
+        // Инициализация VK Bridge
+        vkBridge.send('VKWebAppInit');
+
+        const API_URL = '45.144.232.122'; // ВАЖНО: замени на IP твоего сервера
+
+        let hasPhoto = false;
+        const photoPreview = document.getElementById('photoPreview');
+        const photoInput = document.getElementById('photoInput');
+
+        // Обработка загрузки фото
+        photoInput.addEventListener('change', function(e) {
+            photoPreview.innerHTML = '';
+            const files = e.target.files;
+            
+            if (files.length > 0) {
+                hasPhoto = true;
+                for (let file of files) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        photoPreview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                hasPhoto = false;
+            }
+        });
+
+        // Показ сообщений
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+            
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 5000);
+        }
+
+        // Отправка формы
+        document.getElementById('submissionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+
+            const formData = {
+                type: document.getElementById('type').value,
+                from_city: document.getElementById('fromCity').value,
+                to_city: document.getElementById('toCity').value,
+                date: document.getElementById('date').value || null,
+                what: document.getElementById('what').value,
+                weight: document.getElementById('weight').value || null,
+                comment: document.getElementById('comment').value || null,
+                contact: document.getElementById('contact').value || null,
+                has_photo: hasPhoto,
+                photo_urls: null
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'published') {
+                    showMessage('✅ ' + result.message, 'success');
+                    document.getElementById('submissionForm').reset();
+                    photoPreview.innerHTML = '';
+                    hasPhoto = false;
+                } else if (result.status === 'manual') {
+                    showMessage('⏳ ' + result.message, 'warning');
+                    document.getElementById('submissionForm').reset();
+                    photoPreview.innerHTML = '';
+                    hasPhoto = false;
+                } else if (result.status === 'rejected') {
+                    showMessage('❌ ' + result.message, 'error');
+                } else {
+                    showMessage('⚠️ ' + result.message, 'error');
+                }
+
+            } catch (error) {
+                showMessage('Ошибка отправки. Проверьте подключение к интернету.', 'error');
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить заявку';
+            }
+        });
+    </script>
+</body>
+</html>
