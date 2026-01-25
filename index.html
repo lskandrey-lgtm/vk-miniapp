@@ -268,16 +268,19 @@
         });
 
         // Показ сообщений
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = `message ${type} show`;
-            
-            setTimeout(() => {
-                messageEl.classList.remove('show');
-            }, 5000);
-        }
-
+       function showMessage(text, type) {
+       const messageEl = document.getElementById('message');
+       messageEl.textContent = text;
+       messageEl.className = `message ${type} show`;
+       
+       // Прокрутка к сообщению
+       messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+       
+       // Убираем сообщение через 8 секунд (было 5)
+       setTimeout(() => {
+           messageEl.classList.remove('show');
+       }, 8000);
+   }
         // Отправка формы
         document.getElementById('submissionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
