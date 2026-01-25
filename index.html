@@ -93,14 +93,14 @@
         }
 
         .message {
-       padding: 16px;
-       border-radius: 8px;
-       margin-bottom: 20px;
-       display: none;
-       font-size: 15px;
-       font-weight: 500;
-       text-align: center;
-   }
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: center;
+        }
 
         .message.success {
             background: #e8f5e9;
@@ -161,6 +161,40 @@
             color: #888;
             margin-top: 4px;
         }
+
+        .autocomplete {
+            position: relative;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .autocomplete-items div {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .autocomplete-items div:hover {
+            background-color: #f5f5f5;
+        }
+
+        .autocomplete-active {
+            background-color: #4a76a8 !important;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -169,35 +203,37 @@
         
         <div id="message" class="message"></div>
 
-        <form id="submissionForm">
+        <form id="submissionForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="required">Тип заявки</label>
-                <select id="type" required>
+                <select id="type" name="type" required>
                     <option value="">Выберите тип</option>
                     <option value="Передать">Передать</option>
                     <option value="Перевезти">Перевезти</option>
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group autocomplete">
                 <label class="required">Откуда (город)</label>
-                <input type="text" id="fromCity" placeholder="Москва" required>
+                <input type="text" id="fromCity" name="from_city" placeholder="Москва" required autocomplete="off">
+                <div class="hint">Начните вводить название города</div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group autocomplete">
                 <label class="required">Куда (город)</label>
-                <input type="text" id="toCity" placeholder="Санкт-Петербург" required>
+                <input type="text" id="toCity" name="to_city" placeholder="Санкт-Петербург" required autocomplete="off">
+                <div class="hint">Начните вводить название города</div>
             </div>
 
             <div class="form-group">
                 <label>Дата</label>
-                <input type="date" id="date">
+                <input type="date" id="date" name="date">
                 <div class="hint">Не обязательно</div>
             </div>
 
             <div class="form-group">
                 <label class="required">Что нужно передать/перевезти</label>
-                <select id="what" required>
+                <select id="what" name="what" required>
                     <option value="">Выберите категорию</option>
                     <option value="Посылка">Посылка</option>
                     <option value="Документы">Документы</option>
@@ -209,19 +245,19 @@
 
             <div class="form-group">
                 <label>Вес / габариты</label>
-                <input type="text" id="weight" placeholder="5 кг, небольшая коробка">
+                <input type="text" id="weight" name="weight" placeholder="5 кг, небольшая коробка">
                 <div class="hint">Не обязательно</div>
             </div>
 
             <div class="form-group">
                 <label>Комментарий</label>
-                <textarea id="comment" placeholder="Дополнительная информация..."></textarea>
+                <textarea id="comment" name="comment" placeholder="Дополнительная информация..."></textarea>
                 <div class="hint">Не обязательно</div>
             </div>
 
             <div class="form-group">
                 <label>Контакт (телефон / Telegram)</label>
-                <input type="text" id="contact" placeholder="+7 900 123-45-67 или @username">
+                <input type="text" id="contact" name="contact" placeholder="+7 900 123-45-67 или @username">
                 <div class="hint">Не обязательно, но рекомендуется</div>
             </div>
 
@@ -230,7 +266,7 @@
                 <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
                     <p>📷 Нажмите для загрузки фото</p>
                     <div class="hint">Заявки с фото проходят модерацию</div>
-                    <input type="file" id="photoInput" accept="image/*" multiple>
+                    <input type="file" id="photoInput" name="photos" accept="image/*" multiple>
                 </div>
                 <div id="photoPreview" class="photo-preview"></div>
             </div>
@@ -240,51 +276,125 @@
     </div>
 
     <script>
-        // Инициализация VK Bridge
         vkBridge.send('VKWebAppInit');
 
-        const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev'; // ВАЖНО: замени на IP твоего сервера
+        const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev';
+        let cities = [];
 
-        let hasPhoto = false;
+        // Загрузка списка городов
+        fetch(`${API_URL}/api/cities`)
+            .then(res => res.json())
+            .then(data => {
+                cities = data.cities || [];
+            })
+            .catch(err => console.error('Ошибка загрузки городов:', err));
+
+        // Автодополнение городов
+        function autocomplete(inp) {
+            let currentFocus;
+            
+            inp.addEventListener("input", function(e) {
+                let val = this.value;
+                closeAllLists();
+                if (!val) return false;
+                currentFocus = -1;
+                
+                const list = document.createElement("div");
+                list.setAttribute("class", "autocomplete-items");
+                this.parentNode.appendChild(list);
+                
+                const matches = cities.filter(city => 
+                    city.toLowerCase().includes(val.toLowerCase())
+                ).slice(0, 10);
+                
+                matches.forEach(city => {
+                    const item = document.createElement("div");
+                    item.innerHTML = city.charAt(0).toUpperCase() + city.slice(1);
+                    item.addEventListener("click", function() {
+                        inp.value = this.innerText;
+                        closeAllLists();
+                    });
+                    list.appendChild(item);
+                });
+            });
+            
+            inp.addEventListener("keydown", function(e) {
+                let x = document.querySelector(".autocomplete-items");
+                if (x) x = x.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    currentFocus++;
+                    addActive(x);
+                } else if (e.keyCode == 38) {
+                    currentFocus--;
+                    addActive(x);
+                } else if (e.keyCode == 13) {
+                    e.preventDefault();
+                    if (currentFocus > -1) {
+                        if (x) x[currentFocus].click();
+                    }
+                }
+            });
+            
+            function addActive(x) {
+                if (!x) return false;
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (x.length - 1);
+                x[currentFocus].classList.add("autocomplete-active");
+            }
+            
+            function removeActive(x) {
+                for (let i = 0; i < x.length; i++) {
+                    x[i].classList.remove("autocomplete-active");
+                }
+            }
+            
+            function closeAllLists(elmnt) {
+                const items = document.getElementsByClassName("autocomplete-items");
+                for (let i = 0; i < items.length; i++) {
+                    if (elmnt != items[i] && elmnt != inp) {
+                        items[i].parentNode.removeChild(items[i]);
+                    }
+                }
+            }
+            
+            document.addEventListener("click", function (e) {
+                closeAllLists(e.target);
+            });
+        }
+
+        autocomplete(document.getElementById("fromCity"));
+        autocomplete(document.getElementById("toCity"));
+
         const photoPreview = document.getElementById('photoPreview');
         const photoInput = document.getElementById('photoInput');
 
-        // Обработка загрузки фото
         photoInput.addEventListener('change', function(e) {
             photoPreview.innerHTML = '';
             const files = e.target.files;
             
-            if (files.length > 0) {
-                hasPhoto = true;
-                for (let file of files) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        photoPreview.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            } else {
-                hasPhoto = false;
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    photoPreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
             }
         });
 
-        // Показ сообщений
-       function showMessage(text, type) {
-       const messageEl = document.getElementById('message');
-       messageEl.textContent = text;
-       messageEl.className = `message ${type} show`;
-       
-       // Прокрутка к сообщению
-       messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-       
-       // Убираем сообщение через 8 секунд (было 5)
-       setTimeout(() => {
-           messageEl.classList.remove('show');
-       }, 8000);
-   }
-        // Отправка формы
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+            messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 8000);
+        }
+
         document.getElementById('submissionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -292,26 +402,12 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Отправка...';
 
-            const formData = {
-                type: document.getElementById('type').value,
-                from_city: document.getElementById('fromCity').value,
-                to_city: document.getElementById('toCity').value,
-                date: document.getElementById('date').value || null,
-                what: document.getElementById('what').value,
-                weight: document.getElementById('weight').value || null,
-                comment: document.getElementById('comment').value || null,
-                contact: document.getElementById('contact').value || null,
-                has_photo: hasPhoto,
-                photo_urls: null
-            };
+            const formData = new FormData(this);
 
             try {
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
+                    body: formData
                 });
 
                 const result = await response.json();
@@ -320,12 +416,10 @@
                     showMessage('✅ ' + result.message, 'success');
                     document.getElementById('submissionForm').reset();
                     photoPreview.innerHTML = '';
-                    hasPhoto = false;
                 } else if (result.status === 'manual') {
                     showMessage('⏳ ' + result.message, 'warning');
                     document.getElementById('submissionForm').reset();
                     photoPreview.innerHTML = '';
-                    hasPhoto = false;
                 } else if (result.status === 'rejected') {
                     showMessage('❌ ' + result.message, 'error');
                 } else {
