@@ -92,36 +92,86 @@
             cursor: not-allowed;
         }
 
-        .message {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            font-size: 15px;
-            font-weight: 500;
+        /* Всплывающее уведомление */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 90%;
             text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
         }
 
-        .message.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #4caf50;
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
         }
 
-        .message.error {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef5350;
+        .toast.success {
+            border-left: 4px solid #4caf50;
         }
 
-        .message.warning {
-            background: #fff3e0;
-            color: #e65100;
-            border: 1px solid #ff9800;
+        .toast.error {
+            border-left: 4px solid #f44336;
         }
 
-        .message.show {
-            display: block;
+        .toast.warning {
+            border-left: 4px solid #ff9800;
+        }
+
+        .toast-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .toast-message {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .toast-close {
+            padding: 8px 24px;
+            background: #4a76a8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .toast-close:hover {
+            background: #3d628a;
+        }
+
+        .toast-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .photo-upload {
@@ -161,47 +211,11 @@
             color: #888;
             margin-top: 4px;
         }
-
-        .autocomplete {
-            position: relative;
-        }
-
-        .autocomplete-items {
-            position: absolute;
-            border: 1px solid #ddd;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .autocomplete-items div {
-            padding: 10px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .autocomplete-items div:hover {
-            background-color: #f5f5f5;
-        }
-
-        .autocomplete-active {
-            background-color: #4a76a8 !important;
-            color: white;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Подать заявку на доставку</h1>
-        
-        <div id="message" class="message"></div>
 
         <form id="submissionForm" enctype="multipart/form-data">
             <div class="form-group">
@@ -209,20 +223,20 @@
                 <select id="type" name="type" required>
                     <option value="">Выберите тип</option>
                     <option value="Могу передать">Могу передать</option>
-   <option value="Нужно передать">Нужно передать</option>
+                    <option value="Нужно передать">Нужно передать</option>
+                    <option value="Могу перевезти">Могу перевезти</option>
+                    <option value="Нужно перевезти">Нужно перевезти</option>
                 </select>
             </div>
 
-            <div class="form-group autocomplete">
+            <div class="form-group">
                 <label class="required">Откуда (город)</label>
-                <input type="text" id="fromCity" name="from_city" placeholder="Москва" required autocomplete="off">
-                <div class="hint">Начните вводить название города</div>
+                <input type="text" id="fromCity" name="from_city" placeholder="Москва" required>
             </div>
 
-            <div class="form-group autocomplete">
+            <div class="form-group">
                 <label class="required">Куда (город)</label>
-                <input type="text" id="toCity" name="to_city" placeholder="Санкт-Петербург" required autocomplete="off">
-                <div class="hint">Начните вводить название города</div>
+                <input type="text" id="toCity" name="to_city" placeholder="Санкт-Петербург" required>
             </div>
 
             <div class="form-group">
@@ -256,9 +270,9 @@
             </div>
 
             <div class="form-group">
-                <label>Контакт (телефон / Telegram)</label>
-                <input type="text" id="contact" name="contact" placeholder="+7 900 123-45-67 или @username">
-                <div class="hint">Не обязательно, но рекомендуется</div>
+                <label class="required">Контакт</label>
+                <input type="text" id="contact" name="contact" placeholder="Telegram: @username, VK, WhatsApp или номер телефона" required>
+                <div class="hint">Укажите как с вами связаться (обязательно)</div>
             </div>
 
             <div class="form-group">
@@ -275,96 +289,31 @@
         </form>
     </div>
 
+    <!-- Overlay для затемнения фона -->
+    <div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
+
+    <!-- Всплывающее уведомление -->
+    <div id="toast" class="toast">
+        <div class="toast-icon" id="toastIcon"></div>
+        <div class="toast-message" id="toastMessage"></div>
+        <button class="toast-close" onclick="closeToast()">Закрыть</button>
+    </div>
+
     <script>
         vkBridge.send('VKWebAppInit');
 
         const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev';
-        let cities = [];
+        let vkUserId = null;
 
-        // Загрузка списка городов
-        fetch(`${API_URL}/api/cities`)
-            .then(res => res.json())
+        // Получаем ID пользователя VK
+        vkBridge.send('VKWebAppGetUserInfo')
             .then(data => {
-                cities = data.cities || [];
+                vkUserId = data.id;
+                console.log('VK User ID:', vkUserId);
             })
-            .catch(err => console.error('Ошибка загрузки городов:', err));
-
-        // Автодополнение городов
-        function autocomplete(inp) {
-            let currentFocus;
-            
-            inp.addEventListener("input", function(e) {
-                let val = this.value;
-                closeAllLists();
-                if (!val) return false;
-                currentFocus = -1;
-                
-                const list = document.createElement("div");
-                list.setAttribute("class", "autocomplete-items");
-                this.parentNode.appendChild(list);
-                
-                const matches = cities.filter(city => 
-                    city.toLowerCase().includes(val.toLowerCase())
-                ).slice(0, 10);
-                
-                matches.forEach(city => {
-                    const item = document.createElement("div");
-                    item.innerHTML = city.charAt(0).toUpperCase() + city.slice(1);
-                    item.addEventListener("click", function() {
-                        inp.value = this.innerText;
-                        closeAllLists();
-                    });
-                    list.appendChild(item);
-                });
+            .catch(error => {
+                console.log('Не удалось получить VK User ID:', error);
             });
-            
-            inp.addEventListener("keydown", function(e) {
-                let x = document.querySelector(".autocomplete-items");
-                if (x) x = x.getElementsByTagName("div");
-                if (e.keyCode == 40) {
-                    currentFocus++;
-                    addActive(x);
-                } else if (e.keyCode == 38) {
-                    currentFocus--;
-                    addActive(x);
-                } else if (e.keyCode == 13) {
-                    e.preventDefault();
-                    if (currentFocus > -1) {
-                        if (x) x[currentFocus].click();
-                    }
-                }
-            });
-            
-            function addActive(x) {
-                if (!x) return false;
-                removeActive(x);
-                if (currentFocus >= x.length) currentFocus = 0;
-                if (currentFocus < 0) currentFocus = (x.length - 1);
-                x[currentFocus].classList.add("autocomplete-active");
-            }
-            
-            function removeActive(x) {
-                for (let i = 0; i < x.length; i++) {
-                    x[i].classList.remove("autocomplete-active");
-                }
-            }
-            
-            function closeAllLists(elmnt) {
-                const items = document.getElementsByClassName("autocomplete-items");
-                for (let i = 0; i < items.length; i++) {
-                    if (elmnt != items[i] && elmnt != inp) {
-                        items[i].parentNode.removeChild(items[i]);
-                    }
-                }
-            }
-            
-            document.addEventListener("click", function (e) {
-                closeAllLists(e.target);
-            });
-        }
-
-        autocomplete(document.getElementById("fromCity"));
-        autocomplete(document.getElementById("toCity"));
 
         const photoPreview = document.getElementById('photoPreview');
         const photoInput = document.getElementById('photoInput');
@@ -384,15 +333,38 @@
             }
         });
 
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = `message ${type} show`;
-            messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const toastOverlay = document.getElementById('toastOverlay');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Удаляем старые классы
+            toast.className = 'toast';
             
-            setTimeout(() => {
-                messageEl.classList.remove('show');
-            }, 8000);
+            // Добавляем новый тип
+            toast.classList.add(type);
+            
+            // Устанавливаем иконку
+            if (type === 'success') {
+                toastIcon.textContent = '✅';
+            } else if (type === 'error') {
+                toastIcon.textContent = '❌';
+            } else if (type === 'warning') {
+                toastIcon.textContent = '⏳';
+            }
+            
+            // Устанавливаем сообщение
+            toastMessage.textContent = message;
+            
+            // Показываем уведомление
+            toastOverlay.classList.add('show');
+            toast.classList.add('show');
+        }
+
+        function closeToast() {
+            document.getElementById('toast').classList.remove('show');
+            document.getElementById('toastOverlay').classList.remove('show');
         }
 
         document.getElementById('submissionForm').addEventListener('submit', async function(e) {
@@ -403,6 +375,11 @@
             submitBtn.textContent = 'Отправка...';
 
             const formData = new FormData(this);
+            
+            // Добавляем VK User ID если получили
+            if (vkUserId) {
+                formData.append('vk_user_id', vkUserId);
+            }
 
             try {
                 const response = await fetch(`${API_URL}/api/submit`, {
@@ -413,21 +390,21 @@
                 const result = await response.json();
 
                 if (result.status === 'published') {
-                    showMessage('✅ ' + result.message, 'success');
+                    showToast('Заявка успешно опубликована!', 'success');
                     document.getElementById('submissionForm').reset();
                     photoPreview.innerHTML = '';
                 } else if (result.status === 'manual') {
-                    showMessage('⏳ ' + result.message, 'warning');
+                    showToast('Ваша заявка отправлена на модерацию (содержит фото)', 'warning');
                     document.getElementById('submissionForm').reset();
                     photoPreview.innerHTML = '';
                 } else if (result.status === 'rejected') {
-                    showMessage('❌ ' + result.message, 'error');
+                    showToast(`Заявка отклонена: ${result.message}`, 'error');
                 } else {
-                    showMessage('⚠️ ' + result.message, 'error');
+                    showToast(`Ошибка: ${result.message}`, 'error');
                 }
 
             } catch (error) {
-                showMessage('Ошибка отправки. Проверьте подключение к интернету.', 'error');
+                showToast('Ошибка отправки. Проверьте подключение к интернету.', 'error');
                 console.error('Error:', error);
             } finally {
                 submitBtn.disabled = false;
