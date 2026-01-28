@@ -439,9 +439,13 @@
     <script>
         vkBridge.send('VKWebAppInit');
 
-        // ВАЖНО: Замените этот URL на ваш реальный URL бэкенда
-        const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev'; // Для локальной разработки
-        // const API_URL = 'https://your-domain.com'; // Для продакшена
+        // Автоматическое определение API URL
+        // Если вы используете ngrok, замените URL ниже на ваш реальный ngrok URL
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : 'https://nontravelling-margene-unwarming.ngrok-free.app';
+        
+        console.log('API URL:', API_URL);
         
         let vkUserId = null;
         let citySearchTimeout = null;
@@ -475,7 +479,11 @@
 
                 citySearchTimeout = setTimeout(async () => {
                     try {
-                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`);
+                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`, {
+                            headers: {
+                                'ngrok-skip-browser-warning': 'true'
+                            }
+                        });
                         
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -582,6 +590,9 @@
             try {
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: formData
                 });
 
