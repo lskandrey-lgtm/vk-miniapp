@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Заявка на доставку</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
@@ -12,23 +12,29 @@
             box-sizing: border-box;
         }
 
+        html {
+            height: 100%;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow-y: auto;
         }
 
         .container {
             max-width: 500px;
             width: 100%;
+            margin: 0 auto;
             background: white;
             border-radius: 24px;
             padding: 32px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
         }
 
         h1 {
@@ -278,7 +284,7 @@
             top: 100%;
             left: 0;
             right: 0;
-            max-height: 240px;
+            max-height: 200px;
             overflow-y: auto;
             background: white;
             border: 2px solid #667eea;
@@ -299,6 +305,7 @@
             cursor: pointer;
             border-bottom: 1px solid #f0f0f0;
             transition: all 0.2s ease;
+            font-size: 14px;
         }
 
         .city-item:hover {
@@ -310,19 +317,35 @@
             border-bottom: none;
         }
 
+        .city-loading {
+            padding: 12px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+
         .emoji-icon {
             font-size: 20px;
             margin-right: 8px;
         }
 
         @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
             .container {
                 padding: 24px;
                 border-radius: 20px;
+                margin-bottom: 60px;
             }
 
             h1 {
                 font-size: 24px;
+            }
+
+            input, select, textarea {
+                font-size: 16px;
             }
         }
     </style>
@@ -385,9 +408,9 @@
             </div>
 
             <div class="form-group">
-                <label class="required"><span class="emoji-icon">📱</span>Контакт</label>
-                <input type="text" id="contact" name="contact" placeholder="Telegram, WhatsApp, телефон..." required>
-                <div class="hint">Обязательно - как с вами связаться</div>
+                <label><span class="emoji-icon">📱</span>Контакт</label>
+                <input type="text" id="contact" name="contact" placeholder="Telegram @username, WhatsApp, телефон...">
+                <div class="hint">Telegram или телефон (опционально)</div>
             </div>
 
             <div class="form-group">
@@ -418,7 +441,7 @@
 
         const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev';
         let vkUserId = null;
-        let cities = [];
+        let citySearchTimeout = null;
 
         vkBridge.send('VKWebAppGetUserInfo')
             .then(data => {
@@ -428,50 +451,61 @@
                 console.log('VK User ID error:', error);
             });
 
-        fetch(`${API_URL}/api/cities`)
-            .then(res => res.json())
-            .then(data => {
-                cities = data.cities || [];
-                console.log('Загружено городов:', cities.length);
-            })
-            .catch(err => console.error('Cities load error:', err));
-
         function setupCityAutocomplete(inputId, dropdownId) {
             const input = document.getElementById(inputId);
             const dropdown = document.getElementById(dropdownId);
 
             input.addEventListener('input', function() {
-                const value = this.value.toLowerCase().trim();
+                const value = this.value.trim();
+                
+                clearTimeout(citySearchTimeout);
                 dropdown.innerHTML = '';
 
-                if (value.length < 1) {
+                if (value.length < 2) {
                     dropdown.classList.remove('show');
                     return;
                 }
 
-                const matches = cities.filter(city => 
-                    city.toLowerCase().includes(value)
-                ).slice(0, 8);
+                dropdown.innerHTML = '<div class="city-loading">Поиск...</div>';
+                dropdown.classList.add('show');
 
-                if (matches.length > 0) {
-                    matches.forEach(city => {
-                        const item = document.createElement('div');
-                        item.className = 'city-item';
-                        item.textContent = city;
-                        item.onclick = function() {
-                            input.value = city;
-                            dropdown.classList.remove('show');
-                        };
-                        dropdown.appendChild(item);
-                    });
-                    dropdown.classList.add('show');
-                } else {
-                    dropdown.classList.remove('show');
-                }
+                citySearchTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`);
+                        const data = await response.json();
+                        
+                        dropdown.innerHTML = '';
+
+                        if (data.cities && data.cities.length > 0) {
+                            data.cities.forEach(city => {
+                                const item = document.createElement('div');
+                                item.className = 'city-item';
+                                item.textContent = city;
+                                item.onclick = function() {
+                                    input.value = city;
+                                    dropdown.classList.remove('show');
+                                };
+                                dropdown.appendChild(item);
+                            });
+                            dropdown.classList.add('show');
+                        } else {
+                            dropdown.innerHTML = '<div class="city-loading">Города не найдены</div>';
+                        }
+                    } catch (error) {
+                        console.error('City search error:', error);
+                        dropdown.innerHTML = '<div class="city-loading">Ошибка поиска</div>';
+                    }
+                }, 300);
             });
 
             input.addEventListener('blur', function() {
                 setTimeout(() => dropdown.classList.remove('show'), 200);
+            });
+
+            input.addEventListener('focus', function() {
+                if (this.value.length >= 2 && dropdown.children.length > 0) {
+                    dropdown.classList.add('show');
+                }
             });
         }
 
