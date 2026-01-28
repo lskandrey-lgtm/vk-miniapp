@@ -439,13 +439,17 @@
     <script>
         vkBridge.send('VKWebAppInit');
 
-        const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev';
+        // ВАЖНО: Замените этот URL на ваш реальный URL бэкенда
+        const API_URL = 'http://localhost:8000'; // Для локальной разработки
+        // const API_URL = 'https://your-domain.com'; // Для продакшена
+        
         let vkUserId = null;
         let citySearchTimeout = null;
 
         vkBridge.send('VKWebAppGetUserInfo')
             .then(data => {
                 vkUserId = data.id;
+                console.log('VK User ID получен:', vkUserId);
             })
             .catch(error => {
                 console.log('VK User ID error:', error);
@@ -472,6 +476,11 @@
                 citySearchTimeout = setTimeout(async () => {
                     try {
                         const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`);
+                        
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        
                         const data = await response.json();
                         
                         dropdown.innerHTML = '';
@@ -493,7 +502,7 @@
                         }
                     } catch (error) {
                         console.error('City search error:', error);
-                        dropdown.innerHTML = '<div class="city-loading">Ошибка поиска</div>';
+                        dropdown.innerHTML = '<div class="city-loading">Ошибка поиска. Проверьте подключение к серверу.</div>';
                     }
                 }, 300);
             });
@@ -591,7 +600,8 @@
                 }
 
             } catch (error) {
-                showToast('Ошибка отправки. Проверьте интернет.', 'error');
+                console.error('Submit error:', error);
+                showToast('Ошибка отправки. Проверьте интернет и подключение к серверу.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Отправить заявку';
