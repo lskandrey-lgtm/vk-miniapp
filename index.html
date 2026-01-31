@@ -446,11 +446,13 @@
     <script>
         vkBridge.send('VKWebAppInit');
 
+        // ВАЖНО: Используем ngrok URL
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8000'
-            : 'http://45.144.232.122';
+            : 'https://nontravelling-margene-unwarming.ngrok-free.app';
         
         console.log('API URL:', API_URL);
+        console.log('User Agent:', navigator.userAgent);
         
         let vkUserId = null;
         let citySearchTimeout = null;
@@ -488,11 +490,14 @@
                 citySearchTimeout = setTimeout(async () => {
                     try {
                         console.log('Поиск городов:', value);
-                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`, {
+                        const cacheBuster = new Date().getTime();
+                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}&_=${cacheBuster}`, {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json',
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'ngrok-skip-browser-warning': 'true',
+                                'Cache-Control': 'no-cache'
                             }
                         });
                         
@@ -618,15 +623,21 @@
             }
 
             try {
-                console.log('Отправка формы...');
+                console.log('=== Отправка формы ===');
+                console.log('VK User ID:', vkUserId);
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: formData
                 });
 
                 console.log('Response status:', response.status);
                 
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
