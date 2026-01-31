@@ -446,14 +446,15 @@
     <script>
         vkBridge.send('VKWebAppInit');
 
-        // ПРАВИЛЬНЫЙ URL ДЛЯ NGROK
-        const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.dev';
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : 'http://45.144.232.122';
         
         console.log('API URL:', API_URL);
-        console.log('User Agent:', navigator.userAgent);
         
         let vkUserId = null;
         let citySearchTimeout = null;
+        let activeDropdown = null;
 
         vkBridge.send('VKWebAppGetUserInfo')
             .then(data => {
@@ -467,7 +468,6 @@
         function setupCityAutocomplete(inputId, dropdownId) {
             const input = document.getElementById(inputId);
             const dropdown = document.getElementById(dropdownId);
-            let isSelecting = false;
 
             input.addEventListener('input', function(e) {
                 const value = this.value.trim();
@@ -477,26 +477,23 @@
 
                 if (value.length < 2) {
                     dropdown.classList.remove('show');
+                    activeDropdown = null;
                     return;
                 }
 
                 dropdown.innerHTML = '<div class="city-loading">Поиск...</div>';
                 dropdown.classList.add('show');
+                activeDropdown = dropdown;
 
                 citySearchTimeout = setTimeout(async () => {
                     try {
                         console.log('Поиск городов:', value);
-                        const cacheBuster = new Date().getTime();
-                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}&_=${cacheBuster}`, {
+                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`, {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'ngrok-skip-browser-warning': 'true',
-                                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                                'Pragma': 'no-cache'
-                            },
-                            cache: 'no-store'
+                                'Content-Type': 'application/json'
+                            }
                         });
                         
                         if (!response.ok) {
@@ -514,29 +511,24 @@
                                 item.className = 'city-item';
                                 item.textContent = city;
                                 
-                                // Для desktop
-                                item.addEventListener('click', function(e) {
+                                item.addEventListener('mousedown', function(e) {
                                     e.preventDefault();
-                                    e.stopPropagation();
-                                    isSelecting = true;
                                     input.value = city;
                                     dropdown.classList.remove('show');
-                                    setTimeout(() => { isSelecting = false; }, 300);
+                                    activeDropdown = null;
                                 });
                                 
-                                // Для mobile
-                                item.addEventListener('touchend', function(e) {
+                                item.addEventListener('touchstart', function(e) {
                                     e.preventDefault();
-                                    e.stopPropagation();
-                                    isSelecting = true;
                                     input.value = city;
                                     dropdown.classList.remove('show');
-                                    setTimeout(() => { isSelecting = false; }, 300);
+                                    activeDropdown = null;
                                 }, { passive: false });
                                 
                                 dropdown.appendChild(item);
                             });
                             dropdown.classList.add('show');
+                            activeDropdown = dropdown;
                         } else {
                             dropdown.innerHTML = '<div class="city-loading">Города не найдены</div>';
                         }
@@ -544,20 +536,22 @@
                         console.error('City search error:', error);
                         dropdown.innerHTML = '<div class="city-loading">Ошибка поиска. Попробуйте ещё раз.</div>';
                     }
-                }, 300);
+                }, 400);
             });
 
             input.addEventListener('blur', function() {
                 setTimeout(() => {
-                    if (!isSelecting) {
+                    if (activeDropdown === dropdown) {
                         dropdown.classList.remove('show');
+                        activeDropdown = null;
                     }
-                }, 200);
+                }, 300);
             });
 
             input.addEventListener('focus', function() {
-                if (this.value.length >= 2 && dropdown.children.length > 0 && dropdown.children[0].className !== 'city-loading') {
+                if (this.value.length >= 2 && dropdown.children.length > 0) {
                     dropdown.classList.add('show');
+                    activeDropdown = dropdown;
                 }
             });
         }
@@ -623,27 +617,17 @@
                 formData.append('vk_user_id', vkUserId);
             }
 
-            console.log('=== Отправка формы ===');
-            console.log('VK User ID:', vkUserId);
-            console.log('Есть фото:', photoInput.files.length > 0);
-
             try {
+                console.log('Отправка формы...');
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
-                    headers: {
-                        'ngrok-skip-browser-warning': 'true'
-                    },
-                    body: formData,
-                    mode: 'cors'
+                    body: formData
                 });
 
                 console.log('Response status:', response.status);
-                console.log('Response headers:', [...response.headers.entries()]);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Error response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
@@ -651,24 +635,21 @@
 
                 if (result.status === 'published') {
                     showToast('Заявка успешно опубликована!', 'success');
-                    this.reset();
+                    document.getElementById('submissionForm').reset();
                     photoPreview.innerHTML = '';
                 } else if (result.status === 'manual') {
                     showToast('Ваша заявка отправлена на модерацию', 'warning');
-                    this.reset();
+                    document.getElementById('submissionForm').reset();
                     photoPreview.innerHTML = '';
                 } else if (result.status === 'rejected') {
                     showToast(result.message || 'Заявка отклонена', 'error');
                 } else {
-                    showToast(result.message || 'Неизвестная ошибка', 'error');
+                    showToast(result.message || 'Неизвестный статус', 'error');
                 }
 
             } catch (error) {
-                console.error('=== Ошибка отправки ===');
-                console.error('Error:', error);
-                console.error('Error message:', error.message);
-                console.error('Error stack:', error.stack);
-                showToast('Ошибка отправки: ' + error.message, 'error');
+                console.error('Submit error:', error);
+                showToast('Ошибка отправки. Проверьте подключение к интернету.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Отправить заявку';
