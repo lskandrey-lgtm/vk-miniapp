@@ -446,9 +446,8 @@
     <script>
         vkBridge.send('VKWebAppInit');
 
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:8000'
-            : 'http://45.144.232.122';
+        // ПРАВИЛЬНЫЙ URL ДЛЯ NGROK
+        const API_URL = 'https://nontravelling-margene-unwarming.ngrok-free.app';
         
         console.log('API URL:', API_URL);
         console.log('User Agent:', navigator.userAgent);
@@ -493,6 +492,7 @@
                             headers: {
                                 'Accept': 'application/json',
                                 'Content-Type': 'application/json',
+                                'ngrok-skip-browser-warning': 'true',
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                                 'Pragma': 'no-cache'
                             },
@@ -630,6 +630,9 @@
             try {
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: formData,
                     mode: 'cors'
                 });
