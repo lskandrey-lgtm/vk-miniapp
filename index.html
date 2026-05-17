@@ -435,6 +435,14 @@
         </form>
     </div>
 
+    <div id="vkBlockOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index:99999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px; box-sizing:border-box;">
+        <div style="background:white; border-radius:24px; padding:40px; max-width:320px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:64px; margin-bottom:20px;">🔒</div>
+            <h2 style="font-size:22px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">Доступ ограничен</h2>
+            <p style="color:#666; font-size:15px; line-height:1.6;">Откройте приложение через ВКонтакте для отправки заявок</p>
+        </div>
+    </div>
+
     <div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
 
     <div id="toast" class="toast">
@@ -448,10 +456,20 @@
 
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8000'
-            : 'https://visitor-vancouver-dig-justify.trycloudflare.com';
-        
+            : 'https://ministries-varied-tagged-yield.trycloudflare.com';
+
         console.log('API URL:', API_URL);
-        
+
+        // VK access check
+        const urlParams = new URLSearchParams(window.location.search);
+        const isFromVK = urlParams.has('vk_user_id');
+        const isAdmin = urlParams.get('admin') === 'bsdF1';
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+        if (!isFromVK && !isAdmin && !isLocal) {
+            document.getElementById('vkBlockOverlay').style.display = 'flex';
+        }
+
         let vkUserId = null;
         let citySearchTimeout = null;
         let activeDropdown = null;
@@ -471,7 +489,7 @@
 
             input.addEventListener('input', function(e) {
                 const value = this.value.trim();
-                
+
                 clearTimeout(citySearchTimeout);
                 dropdown.innerHTML = '';
 
@@ -490,14 +508,14 @@
                         console.log('Поиск городов:', value);
                         const cacheBuster = new Date().getTime();
                         const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}&_=${cacheBuster}`);
-                        
+
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                        
+
                         const data = await response.json();
                         console.log('Города получены:', data.cities?.length || 0);
-                        
+
                         dropdown.innerHTML = '';
 
                         if (data.cities && data.cities.length > 0) {
@@ -505,7 +523,7 @@
                                 const item = document.createElement('div');
                                 item.className = 'city-item';
                                 item.textContent = city;
-                                
+
                                 // Универсальный обработчик выбора города
                                 const selectCity = function(e) {
                                     if (e) {
@@ -518,12 +536,12 @@
                                     activeDropdown = null;
                                     console.log('Город выбран:', city);
                                 };
-                                
+
                                 // Используем pointerdown - работает и на mouse и на touch
                                 item.addEventListener('pointerdown', selectCity);
                                 // Резервный обработчик на click для надёжности
                                 item.addEventListener('click', selectCity);
-                                
+
                                 dropdown.appendChild(item);
                             });
                             dropdown.classList.add('show');
@@ -564,7 +582,7 @@
         photoInput.addEventListener('change', function(e) {
             photoPreview.innerHTML = '';
             const files = e.target.files;
-            
+
             for (let file of files) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -584,16 +602,16 @@
 
             toast.className = 'toast';
             toast.classList.add(type);
-            
+
             const icons = {
                 'success': '✅',
                 'error': '❌',
                 'warning': '⏳'
             };
-            
+
             toastIcon.textContent = icons[type] || '📮';
             toastMessage.textContent = message;
-            
+
             toastOverlay.classList.add('show');
             toast.classList.add('show');
         }
@@ -605,15 +623,21 @@
 
         document.getElementById('submissionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Отправка...';
 
             const formData = new FormData(this);
-            
+
             if (vkUserId) {
                 formData.append('vk_user_id', vkUserId);
+            }
+
+            if (isAdmin) {
+                formData.append('admin_key', 'bsdF1');
+            } else {
+                formData.append('vk_launch_params', window.location.search);
             }
 
             try {
@@ -625,7 +649,7 @@
                 });
 
                 console.log('Response status:', response.status);
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('Error response:', errorText);
