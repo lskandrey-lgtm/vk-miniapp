@@ -35,6 +35,7 @@
             -webkit-font-smoothing: antialiased;
             padding-bottom: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* ── Header ── */
@@ -96,7 +97,7 @@
         .card {
             background: var(--card);
             border-radius: var(--r);
-            overflow: hidden;
+            /* overflow:hidden removed — was clipping city autocomplete dropdown */
             box-shadow: 0 1px 3px rgba(91,33,182,0.06), 0 4px 12px rgba(91,33,182,0.04);
             border: 1px solid var(--border);
         }
@@ -199,8 +200,8 @@
 
         textarea {
             resize: none;
-            min-height: 52px;
-            padding: 3px 0;
+            min-height: 36px;
+            padding: 2px 0;
             line-height: 1.5;
         }
 
@@ -246,8 +247,8 @@
         .city-dropdown {
             position: absolute;
             top: calc(100% + 4px);
-            left: -14px;
-            right: -14px;
+            left: 0;
+            right: 0;
             max-height: 200px;
             overflow-y: auto;
             background: #fff;
@@ -580,7 +581,7 @@
 
     <!-- Type -->
     <div class="card">
-        <div class="card-header">Тип заявки</div>
+        <div class="card-header">Тип заявки <span class="req">*</span></div>
         <div class="type-row">
             <button type="button" class="type-btn" id="typeBtnSend" onclick="selectType('Могу передать')">
                 <span class="ti">📦</span> Могу передать
@@ -599,7 +600,7 @@
                 <div class="city-input-wrap">
                     <span class="ci-icon">📍</span>
                     <div class="city-wrap">
-                        <input type="text" id="fromCity" name="from_city" placeholder="Откуда" autocomplete="off" required>
+                        <input type="text" id="fromCity" name="from_city" placeholder="Откуда *" autocomplete="off" required>
                         <div class="city-dropdown" id="fromCityDropdown"></div>
                     </div>
                 </div>
@@ -617,7 +618,7 @@
                 <div class="city-input-wrap">
                     <span class="ci-icon">🎯</span>
                     <div class="city-wrap">
-                        <input type="text" id="toCity" name="to_city" placeholder="Куда" autocomplete="off" required>
+                        <input type="text" id="toCity" name="to_city" placeholder="Куда *" autocomplete="off" required>
                         <div class="city-dropdown" id="toCityDropdown"></div>
                     </div>
                 </div>
@@ -665,7 +666,7 @@
             </div>
         </div>
 
-        <div class="field-row" style="align-items:flex-start; padding-top:10px; padding-bottom:10px;">
+        <div class="field-row" style="align-items:flex-start; padding-top:8px; padding-bottom:8px;">
             <span class="field-icon" style="margin-top:2px">💬</span>
             <div class="field-inner">
                 <div class="field-label">Комментарий</div>
