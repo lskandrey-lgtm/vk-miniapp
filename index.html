@@ -33,19 +33,18 @@
             font-size: 14px;
             line-height: 1.4;
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 28px;
+            padding-bottom: 20px;
             min-height: 100vh;
         }
 
         /* ── Header ── */
         header {
             background: linear-gradient(145deg, #2D0B6E 0%, #4C17A0 35%, #6D28D9 70%, #8B5CF6 100%);
-            padding: 16px 16px 36px;
+            padding: 12px 14px 28px;
             display: flex;
             align-items: center;
             gap: 12px;
             position: relative;
-            overflow: hidden;
         }
 
         header::before {
@@ -85,10 +84,10 @@
 
         /* ── Container ── */
         .content {
-            margin: -20px 10px 0;
+            margin: -10px 10px 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             position: relative;
             z-index: 2;
         }
@@ -156,7 +155,7 @@
             align-items: center;
             padding: 0 14px;
             border-bottom: 1px solid var(--border);
-            min-height: 48px;
+            min-height: 44px;
             gap: 10px;
         }
 
@@ -206,6 +205,40 @@
         }
 
         input[type="date"] { color: var(--t1); }
+
+        /* ── Route card highlight ── */
+        .card-route {
+            background: linear-gradient(160deg, #F3EFFE 0%, #FAF8FF 100%);
+            border-color: #D8D0F5;
+        }
+
+        .card-route .field-row {
+            border-bottom-color: #E2DBF5;
+        }
+
+        .city-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: var(--rs);
+            padding: 0 10px;
+            margin: 8px 0;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .city-input-wrap:focus-within {
+            border-color: var(--p2);
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+        }
+
+        .city-input-wrap .ci-icon { font-size: 15px; flex-shrink: 0; }
+
+        .city-input-wrap input {
+            padding: 10px 0;
+            font-size: 14px;
+        }
 
         /* City dropdown */
         .city-wrap { position: relative; flex: 1; min-width: 0; }
@@ -559,38 +592,39 @@
     </div>
 
     <!-- Route -->
-    <div class="card">
-        <div class="card-header" style="padding-bottom:4px">Маршрут</div>
-
-        <div class="field-row">
-            <span class="field-icon">📍</span>
-            <div class="city-wrap">
-                <div class="field-label"><span class="req">*</span> Откуда</div>
-                <input type="text" id="fromCity" name="from_city" placeholder="Город отправления" autocomplete="off" required>
-                <div class="city-dropdown" id="fromCityDropdown"></div>
+    <div class="card card-route">
+        <div class="card-header" style="padding-bottom:2px">Маршрут</div>
+        <div style="padding: 0 12px 4px;">
+            <div style="position:relative;">
+                <div class="city-input-wrap">
+                    <span class="ci-icon">📍</span>
+                    <div class="city-wrap">
+                        <input type="text" id="fromCity" name="from_city" placeholder="Откуда" autocomplete="off" required>
+                        <div class="city-dropdown" id="fromCityDropdown"></div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="route-divider">
-            <span class="field-icon" style="opacity:0">·</span>
-            <div class="route-arrow">
-                <div class="route-arrow-line"></div>
+            <div style="display:flex; align-items:center; gap:6px; padding: 1px 4px;">
+                <div style="flex:1; height:1px; background:linear-gradient(90deg,var(--p4),transparent);"></div>
                 <div class="route-arrow-dot">
-                    <svg viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+                    <svg viewBox="0 0 12 12" style="width:12px;height:12px;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none;"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+                </div>
+                <div style="flex:1; height:1px; background:linear-gradient(270deg,var(--p4),transparent);"></div>
+            </div>
+
+            <div style="position:relative;">
+                <div class="city-input-wrap">
+                    <span class="ci-icon">🎯</span>
+                    <div class="city-wrap">
+                        <input type="text" id="toCity" name="to_city" placeholder="Куда" autocomplete="off" required>
+                        <div class="city-dropdown" id="toCityDropdown"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="field-row">
-            <span class="field-icon">🎯</span>
-            <div class="city-wrap">
-                <div class="field-label"><span class="req">*</span> Куда</div>
-                <input type="text" id="toCity" name="to_city" placeholder="Город назначения" autocomplete="off" required>
-                <div class="city-dropdown" id="toCityDropdown"></div>
-            </div>
-        </div>
-
-        <div class="field-row">
+        <div class="field-row" style="border-top: 1px solid var(--border);">
             <span class="field-icon">📅</span>
             <div class="field-inner">
                 <div class="field-label">Дата поездки</div>
@@ -884,6 +918,15 @@
         } finally {
             btn.disabled = false; btn.textContent = 'Отправить заявку';
         }
+    }
+
+    // ── Keyboard avoidance ──
+    if (window.visualViewport) {
+        const BASE_PB = 20;
+        window.visualViewport.addEventListener('resize', () => {
+            const kb = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+            document.body.style.paddingBottom = (kb > 60 ? kb + BASE_PB : BASE_PB) + 'px';
+        });
     }
 
     function resetForm() {
