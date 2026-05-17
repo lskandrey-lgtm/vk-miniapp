@@ -446,13 +446,11 @@
     <script>
         vkBridge.send('VKWebAppInit');
 
-        // ВАЖНО: Используем ngrok URL
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8000'
             : 'https://nontravelling-margene-unwarming.ngrok-free.dev';
         
         console.log('API URL:', API_URL);
-        console.log('User Agent:', navigator.userAgent);
         
         let vkUserId = null;
         let citySearchTimeout = null;
@@ -516,19 +514,23 @@
                                 item.className = 'city-item';
                                 item.textContent = city;
                                 
-                                item.addEventListener('mousedown', function(e) {
-                                    e.preventDefault();
+                                // Универсальный обработчик выбора города
+                                const selectCity = function(e) {
+                                    if (e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }
                                     input.value = city;
                                     dropdown.classList.remove('show');
+                                    dropdown.innerHTML = '';
                                     activeDropdown = null;
-                                });
+                                    console.log('Город выбран:', city);
+                                };
                                 
-                                item.addEventListener('touchstart', function(e) {
-                                    e.preventDefault();
-                                    input.value = city;
-                                    dropdown.classList.remove('show');
-                                    activeDropdown = null;
-                                }, { passive: false });
+                                // Используем pointerdown - работает и на mouse и на touch
+                                item.addEventListener('pointerdown', selectCity);
+                                // Резервный обработчик на click для надёжности
+                                item.addEventListener('click', selectCity);
                                 
                                 dropdown.appendChild(item);
                             });
@@ -623,8 +625,7 @@
             }
 
             try {
-                console.log('=== Отправка формы ===');
-                console.log('VK User ID:', vkUserId);
+                console.log('Отправка формы...');
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
                     headers: {
