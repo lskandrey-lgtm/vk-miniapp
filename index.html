@@ -7,675 +7,542 @@
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
         :root {
-            --primary: #6C3CE1;
-            --primary-light: #8B5CF6;
-            --primary-dark: #4F1FBF;
-            --accent: #F59E0B;
-            --surface: #FFFFFF;
-            --surface-2: #F8F7FF;
-            --border: #E8E4F8;
-            --text: #1A1033;
-            --text-2: #6B6585;
-            --text-3: #A09BB8;
-            --success: #10B981;
-            --error: #EF4444;
-            --warning: #F59E0B;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --shadow: 0 2px 12px rgba(108,60,225,0.08);
-            --shadow-lg: 0 8px 32px rgba(108,60,225,0.16);
+            --p: #5B21B6;
+            --p2: #7C3AED;
+            --p3: #A78BFA;
+            --bg: #F4F2FB;
+            --card: #fff;
+            --border: #E5E1F5;
+            --t1: #1C1033;
+            --t2: #6B6280;
+            --t3: #B0AABF;
+            --ok: #059669;
+            --err: #DC2626;
+            --warn: #D97706;
+            --r: 14px;
+            --rs: 9px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html {
-            height: 100%;
-            -webkit-overflow-scrolling: touch;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-            background: var(--surface-2);
-            min-height: 100vh;
-            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--t1);
+            font-size: 14px;
+            line-height: 1.4;
             -webkit-font-smoothing: antialiased;
+            padding-bottom: 24px;
         }
 
         /* ── Header ── */
-        .app-header {
-            background: var(--primary);
-            background: linear-gradient(135deg, #4F1FBF 0%, #6C3CE1 50%, #8B5CF6 100%);
-            padding: 28px 20px 48px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .app-header::before {
-            content: '';
-            position: absolute;
-            top: -40px; right: -40px;
-            width: 180px; height: 180px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.06);
-            pointer-events: none;
-        }
-
-        .app-header::after {
-            content: '';
-            position: absolute;
-            bottom: -60px; left: -30px;
-            width: 220px; height: 220px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.04);
-            pointer-events: none;
-        }
-
-        .logo-wrap {
-            display: inline-flex;
+        header {
+            background: linear-gradient(135deg, #3B0F9E 0%, #5B21B6 55%, #7C3AED 100%);
+            padding: 14px 16px 32px;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            width: 64px; height: 64px;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 36px; height: 36px; flex-shrink: 0;
             background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            margin-bottom: 16px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
             border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .logo-wrap svg {
-            width: 36px; height: 36px;
-        }
+        .logo svg { width: 20px; height: 20px; }
 
-        .app-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-        }
+        .header-text { flex: 1; }
+        .header-title { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+        .header-sub   { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 1px; }
 
-        .app-subtitle {
-            font-size: 14px;
-            color: rgba(255,255,255,0.7);
-            font-weight: 400;
+        /* ── Container ── */
+        .content {
+            margin: -18px 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         /* ── Card ── */
         .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin: 0 16px 12px;
-            box-shadow: var(--shadow);
+            background: var(--card);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 0 1px 6px rgba(91,33,182,0.07);
             border: 1px solid var(--border);
         }
 
-        .card:first-of-type { margin-top: -24px; }
-
-        .section-label {
+        .card-header {
+            padding: 11px 14px 0;
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.6px;
             text-transform: uppercase;
-            color: var(--text-3);
-            margin-bottom: 14px;
+            color: var(--t3);
         }
 
         /* ── Type Toggle ── */
-        .type-toggle {
+        .type-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
+            padding: 10px 12px 12px;
         }
 
         .type-btn {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 6px;
-            padding: 14px 12px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--surface-2);
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--rs);
+            background: var(--bg);
             cursor: pointer;
-            transition: all 0.2s ease;
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-2);
-            -webkit-tap-highlight-color: transparent;
+            color: var(--t2);
+            transition: all 0.15s;
             user-select: none;
         }
 
-        .type-btn .type-icon {
-            font-size: 28px;
-            line-height: 1;
-        }
+        .type-btn .ti { font-size: 18px; line-height: 1; }
 
         .type-btn.active {
-            border-color: var(--primary);
-            background: #F3EEFF;
-            color: var(--primary);
+            border-color: var(--p2);
+            background: #EDE9FE;
+            color: var(--p);
         }
 
-        .type-btn:active { transform: scale(0.97); }
-
-        /* ── Form Fields ── */
-        .field {
-            margin-bottom: 14px;
-        }
-
-        .field:last-child { margin-bottom: 0; }
-
-        .field-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-2);
-            margin-bottom: 7px;
+        /* ── Fields ── */
+        .field-row {
             display: flex;
             align-items: center;
-            gap: 5px;
+            padding: 0 14px;
+            border-bottom: 1px solid var(--border);
+            min-height: 48px;
+            gap: 10px;
         }
 
-        .field-label .req { color: var(--error); }
+        .field-row:last-child { border-bottom: none; }
 
-        .input-wrap {
-            position: relative;
+        .field-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+
+        .field-inner { flex: 1; min-width: 0; }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--t3);
+            margin-bottom: 1px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
 
-        .input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            pointer-events: none;
-            z-index: 1;
-        }
+        .req { color: var(--err); }
 
-        input, select, textarea {
+        input, textarea {
             width: 100%;
-            padding: 13px 14px 13px 42px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--text);
-            background: var(--surface-2);
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        input:focus, select:focus, textarea:focus {
+            border: none;
             outline: none;
-            border-color: var(--primary);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(108,60,225,0.12);
+            background: transparent;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--t1);
+            padding: 0;
         }
 
-        input.no-icon, select.no-icon, textarea.no-icon {
-            padding-left: 14px;
-        }
-
-        select {
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6585' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 40px;
-        }
+        input::placeholder, textarea::placeholder { color: var(--t3); }
 
         textarea {
-            resize: vertical;
-            min-height: 80px;
-            padding-top: 13px;
+            resize: none;
+            min-height: 56px;
+            padding: 4px 0;
             line-height: 1.5;
         }
 
-        .hint {
-            font-size: 12px;
-            color: var(--text-3);
-            margin-top: 5px;
-            padding-left: 2px;
-        }
+        input[type="date"] { color: var(--t1); }
 
-        /* ── Category Grid ── */
-        .cat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
+        /* City dropdown */
+        .city-wrap { position: relative; flex: 1; min-width: 0; }
 
-        .cat-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 12px 6px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--surface-2);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-2);
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        .cat-btn .cat-icon { font-size: 24px; line-height: 1; }
-
-        .cat-btn.active {
-            border-color: var(--primary);
-            background: #F3EEFF;
-            color: var(--primary);
-        }
-
-        .cat-btn:active { transform: scale(0.96); }
-
-        /* Hidden select for form submission */
-        #what { display: none; }
-
-        /* ── Route Section ── */
-        .route-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .route-wrap .input-wrap { flex: 1; }
-
-        .route-arrow {
-            flex-shrink: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 0;
-        }
-
-        .route-arrow svg {
-            width: 16px; height: 16px;
-            fill: none;
-            stroke: #fff;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* ── City Autocomplete ── */
         .city-dropdown {
             position: absolute;
-            top: calc(100% + 4px);
-            left: 0; right: 0;
-            max-height: 220px;
+            top: calc(100% + 2px);
+            left: -14px;
+            right: -14px;
+            max-height: 200px;
             overflow-y: auto;
-            background: var(--surface);
-            border: 1.5px solid var(--primary);
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-lg);
-            z-index: 200;
+            background: #fff;
+            border: 1.5px solid var(--p2);
+            border-radius: var(--rs);
+            box-shadow: 0 8px 24px rgba(91,33,182,0.14);
+            z-index: 100;
             display: none;
         }
 
         .city-dropdown.show { display: block; }
 
         .city-item {
-            padding: 12px 16px;
-            cursor: pointer;
+            padding: 10px 14px;
             font-size: 14px;
-            color: var(--text);
+            color: var(--t1);
             border-bottom: 1px solid var(--border);
-            transition: background 0.15s;
-            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
         }
 
         .city-item:last-child { border-bottom: none; }
-        .city-item:hover, .city-item:active { background: var(--surface-2); }
+        .city-item:active { background: var(--bg); }
+        .city-loading { padding: 10px 14px; color: var(--t3); font-size: 13px; }
 
-        .city-loading {
-            padding: 14px 16px;
-            text-align: center;
-            color: var(--text-3);
-            font-size: 13px;
+        /* Route arrow */
+        .route-divider {
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
         }
+
+        .route-divider .field-icon { opacity: 0; }
+
+        .route-arrow {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 0;
+        }
+
+        .route-arrow-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--p3), transparent);
+        }
+
+        .route-arrow-dot {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--p2);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .route-arrow-dot svg {
+            width: 12px; height: 12px;
+            stroke: #fff; stroke-width: 2.5;
+            stroke-linecap: round; stroke-linejoin: round;
+            fill: none;
+        }
+
+        /* ── Category Grid ── */
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            padding: 10px 12px 12px;
+        }
+
+        .cat-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 8px 4px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--rs);
+            background: var(--bg);
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--t2);
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .cat-btn .ci { font-size: 20px; line-height: 1; }
+
+        .cat-btn.active {
+            border-color: var(--p2);
+            background: #EDE9FE;
+            color: var(--p);
+        }
+
+        #what { display: none; }
 
         /* ── Photo Upload ── */
         .photo-upload {
-            border: 2px dashed var(--border);
-            border-radius: var(--radius-sm);
-            padding: 20px;
+            margin: 10px 12px 12px;
+            border: 1.5px dashed var(--border);
+            border-radius: var(--rs);
+            padding: 14px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            background: var(--surface-2);
-            -webkit-tap-highlight-color: transparent;
+            background: var(--bg);
         }
 
-        .photo-upload:hover, .photo-upload:active {
-            border-color: var(--primary);
-            background: #F3EEFF;
+        .photo-upload:active {
+            border-color: var(--p2);
+            background: #EDE9FE;
         }
 
         .photo-upload input { display: none; }
-
-        .photo-upload-icon { font-size: 36px; margin-bottom: 6px; }
-        .photo-upload-text { font-size: 14px; color: var(--text-2); font-weight: 500; }
-        .photo-upload-hint { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+        .photo-upload-icon { font-size: 24px; margin-bottom: 4px; }
+        .photo-upload-text { font-size: 13px; color: var(--t2); font-weight: 500; }
+        .photo-upload-hint { font-size: 11px; color: var(--t3); margin-top: 2px; }
 
         .photo-preview {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
-            gap: 8px;
-            margin-top: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+            gap: 6px;
+            padding: 0 12px 12px;
         }
 
         .photo-preview img {
-            width: 100%;
-            aspect-ratio: 1;
+            width: 100%; aspect-ratio: 1;
             object-fit: cover;
-            border-radius: 8px;
-            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            border: 1px solid var(--border);
         }
 
-        /* ── Submit Button ── */
-        .submit-wrap {
-            padding: 4px 16px 32px;
-        }
+        /* ── Submit ── */
+        .submit-wrap { padding: 0 12px; }
 
         .submit-btn {
             width: 100%;
-            padding: 17px;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
-            color: white;
+            padding: 14px;
+            background: linear-gradient(135deg, #3B0F9E, #5B21B6 50%, #7C3AED);
+            color: #fff;
             border: none;
-            border-radius: var(--radius);
-            font-size: 16px;
+            border-radius: var(--r);
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            letter-spacing: 0.3px;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 20px rgba(108,60,225,0.4);
-            position: relative;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 4px 16px rgba(91,33,182,0.35);
+            transition: opacity 0.2s, transform 0.15s;
+            letter-spacing: 0.1px;
         }
 
-        .submit-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255,255,255,0);
-            transition: background 0.2s;
-        }
-
-        .submit-btn:hover::after { background: rgba(255,255,255,0.08); }
-        .submit-btn:active { transform: scale(0.98); box-shadow: 0 2px 10px rgba(108,60,225,0.3); }
-
-        .submit-btn:disabled {
-            background: #C4BFD8;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .submit-btn:active { transform: scale(0.99); opacity: 0.9; }
+        .submit-btn:disabled { background: #C4BFD8; box-shadow: none; transform: none; cursor: not-allowed; }
 
         /* ── Toast ── */
         .toast-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(26,16,51,0.5);
-            backdrop-filter: blur(6px);
+            position: fixed; inset: 0;
+            background: rgba(20,10,40,0.45);
+            backdrop-filter: blur(4px);
             z-index: 9000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
         }
 
         .toast-overlay.show { opacity: 1; pointer-events: auto; }
 
         .toast {
             position: fixed;
-            bottom: 24px;
-            left: 16px; right: 16px;
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 20px 60px rgba(26,16,51,0.25);
+            bottom: 16px; left: 12px; right: 12px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px 18px;
             z-index: 9001;
             text-align: center;
-            transform: translateY(120%);
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(110%);
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
             pointer-events: none;
+            box-shadow: 0 16px 48px rgba(20,10,40,0.2);
         }
 
-        .toast.show {
-            transform: translateY(0);
-            pointer-events: auto;
-        }
+        .toast.show { transform: translateY(0); pointer-events: auto; }
+        .toast.success { border-top: 3px solid var(--ok); }
+        .toast.error   { border-top: 3px solid var(--err); }
+        .toast.warning { border-top: 3px solid var(--warn); }
 
-        .toast.success { border-top: 3px solid var(--success); }
-        .toast.error   { border-top: 3px solid var(--error); }
-        .toast.warning { border-top: 3px solid var(--warning); }
-
-        .toast-icon { font-size: 48px; margin-bottom: 10px; }
-        .toast-message { font-size: 15px; color: var(--text); line-height: 1.5; margin-bottom: 18px; font-weight: 500; }
+        .toast-icon { font-size: 40px; margin-bottom: 8px; }
+        .toast-message { font-size: 14px; color: var(--t1); line-height: 1.5; margin-bottom: 14px; font-weight: 500; }
 
         .toast-close {
-            padding: 11px 28px;
-            background: var(--primary);
-            color: white;
+            padding: 9px 24px;
+            background: var(--p2);
+            color: #fff;
             border: none;
-            border-radius: 12px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
 
-        .toast-close:active { opacity: 0.8; }
-
-        /* ── Block Overlays ── */
-        .overlay-screen {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(160deg, #3B0F9E 0%, #6C3CE1 60%, #A78BFA 100%);
+        /* ── Overlays ── */
+        .overlay {
+            position: fixed; inset: 0;
+            background: linear-gradient(160deg, #2D0A7A 0%, #5B21B6 55%, #7C3AED 100%);
             z-index: 99999;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 24px;
+        }
+
+        .overlay-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 320px;
             text-align: center;
-            padding: 40px 24px;
         }
 
-        .overlay-card {
+        .ov-icon { font-size: 48px; margin-bottom: 14px; }
+        .ov-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; letter-spacing: -0.2px; }
+        .ov-text  { font-size: 14px; color: rgba(255,255,255,0.68); line-height: 1.5; }
+
+        .ov-input {
+            width: 100%; margin-top: 18px;
+            padding: 12px 14px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            border-radius: 10px;
             background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 24px;
-            padding: 40px 32px;
-            max-width: 340px;
-            width: 100%;
-        }
-
-        .overlay-icon { font-size: 60px; margin-bottom: 20px; }
-
-        .overlay-title {
-            font-size: 22px;
-            font-weight: 800;
             color: #fff;
-            margin-bottom: 10px;
-            letter-spacing: -0.3px;
-        }
-
-        .overlay-text {
-            font-size: 15px;
-            color: rgba(255,255,255,0.75);
-            line-height: 1.6;
-            margin-bottom: 0;
-        }
-
-        /* Admin overlay extras */
-        .overlay-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1.5px solid rgba(255,255,255,0.3);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             font-family: inherit;
-            margin-bottom: 12px;
             outline: none;
-            box-sizing: border-box;
             transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
-        .overlay-input::placeholder { color: rgba(255,255,255,0.5); }
-        .overlay-input:focus { border-color: rgba(255,255,255,0.7); }
+        .ov-input::placeholder { color: rgba(255,255,255,0.4); }
+        .ov-input:focus { border-color: rgba(255,255,255,0.6); }
 
-        .overlay-btn {
-            width: 100%;
-            padding: 14px;
+        .ov-error {
+            font-size: 12px;
+            color: #FCA5A5;
+            margin-top: 6px;
+            display: none;
+            text-align: left;
+        }
+
+        .ov-btn {
+            width: 100%; margin-top: 12px;
+            padding: 13px;
             background: #fff;
-            color: var(--primary);
+            color: var(--p);
             border: none;
-            border-radius: 12px;
-            font-size: 15px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            transition: opacity 0.2s, transform 0.15s;
+            transition: opacity 0.2s;
+            font-family: inherit;
         }
 
-        .overlay-btn:active { transform: scale(0.98); opacity: 0.9; }
-
-        .overlay-error {
-            color: #FECACA;
-            font-size: 13px;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        /* ── Date Input ── */
-        input[type="date"] {
-            color: var(--text);
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            opacity: 0.5;
-            cursor: pointer;
-        }
+        .ov-btn:active { opacity: 0.85; }
 
         /* ── Responsive ── */
-        @media (max-width: 380px) {
-            .cat-grid { grid-template-columns: repeat(3, 1fr); }
-            .cat-btn { padding: 10px 4px; font-size: 10px; }
-            .cat-btn .cat-icon { font-size: 20px; }
-            .app-title { font-size: 22px; }
+        @media (min-width: 520px) {
+            body { background: #DDD8F5; padding-bottom: 32px; }
+            .content { max-width: 440px; margin-left: auto; margin-right: auto; }
+            .submit-wrap { max-width: 440px; margin: 0 auto; }
+            header { justify-content: center; }
         }
 
-        @media (min-width: 600px) {
-            body { background: #EEEAF8; }
-            .app-header { padding: 40px 20px 64px; }
-            .card { max-width: 520px; margin-left: auto; margin-right: auto; }
-            .submit-wrap { max-width: 520px; margin: 0 auto; }
+        @media (max-width: 360px) {
+            .cat-grid { grid-template-columns: repeat(5, 1fr); }
+            .cat-btn .ci { font-size: 17px; }
+            .cat-btn { font-size: 9px; padding: 7px 3px; }
+            .type-btn { font-size: 12px; gap: 6px; padding: 9px 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <div class="app-header">
-        <div class="logo-wrap">
-            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 18C6 18 9 8 18 8C24 8 28 12 30 15" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M30 18C30 18 27 28 18 28C12 28 8 24 6 21" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M26 11L30 15L34 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 25L6 21L2 25" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="18" cy="18" r="4" fill="white" fill-opacity="0.9"/>
-            </svg>
-        </div>
-        <div class="app-title">Передача посылок</div>
-        <div class="app-subtitle">Найди попутчика или отправь груз</div>
+<header>
+    <div class="logo">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 10C3 10 5 5 10 5C13.5 5 15.5 7 17 9" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M17 10C17 10 15 15 10 15C6.5 15 4.5 13 3 11" stroke="rgba(255,255,255,0.55)" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M14.5 6.5L17 9L19.5 6.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.5 13.5L3 11L0.5 13.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="10" cy="10" r="2" fill="white"/>
+        </svg>
     </div>
+    <div class="header-text">
+        <div class="header-title">Передача посылок</div>
+        <div class="header-sub">Найди попутчика или отправь груз</div>
+    </div>
+</header>
+
+<div class="content">
 
     <!-- Type -->
     <div class="card">
-        <div class="section-label">Тип заявки</div>
-        <div class="type-toggle">
+        <div class="card-header">Тип заявки</div>
+        <div class="type-row">
             <button type="button" class="type-btn" id="typeBtnSend" onclick="selectType('Могу передать')">
-                <span class="type-icon">📦</span>
-                Могу передать
+                <span class="ti">📦</span> Могу передать
             </button>
             <button type="button" class="type-btn" id="typeBtnNeed" onclick="selectType('Нужно передать')">
-                <span class="type-icon">🔍</span>
-                Нужно передать
+                <span class="ti">🔍</span> Нужно передать
             </button>
         </div>
     </div>
 
     <!-- Route -->
     <div class="card">
-        <div class="section-label">Маршрут</div>
-        <div class="field">
-            <div class="field-label">Откуда <span class="req">*</span></div>
-            <div class="input-wrap">
-                <span class="input-icon">📍</span>
-                <input type="text" id="fromCity" name="from_city" placeholder="Город отправления" required autocomplete="off">
+        <div class="card-header" style="padding-bottom:4px">Маршрут</div>
+
+        <div class="field-row">
+            <span class="field-icon">📍</span>
+            <div class="city-wrap">
+                <div class="field-label"><span class="req">*</span> Откуда</div>
+                <input type="text" id="fromCity" name="from_city" placeholder="Город отправления" autocomplete="off" required>
                 <div class="city-dropdown" id="fromCityDropdown"></div>
             </div>
         </div>
 
-        <div class="route-wrap" style="justify-content:center;margin:4px 0 10px">
+        <div class="route-divider">
+            <span class="field-icon" style="opacity:0">·</span>
             <div class="route-arrow">
-                <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+                <div class="route-arrow-line"></div>
+                <div class="route-arrow-dot">
+                    <svg viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+                </div>
             </div>
         </div>
 
-        <div class="field">
-            <div class="field-label">Куда <span class="req">*</span></div>
-            <div class="input-wrap">
-                <span class="input-icon">🎯</span>
-                <input type="text" id="toCity" name="to_city" placeholder="Город назначения" required autocomplete="off">
+        <div class="field-row">
+            <span class="field-icon">🎯</span>
+            <div class="city-wrap">
+                <div class="field-label"><span class="req">*</span> Куда</div>
+                <input type="text" id="toCity" name="to_city" placeholder="Город назначения" autocomplete="off" required>
                 <div class="city-dropdown" id="toCityDropdown"></div>
             </div>
         </div>
 
-        <div class="field">
-            <div class="field-label">Дата поездки</div>
-            <div class="input-wrap">
-                <span class="input-icon">📅</span>
+        <div class="field-row">
+            <span class="field-icon">📅</span>
+            <div class="field-inner">
+                <div class="field-label">Дата поездки</div>
                 <input type="date" id="date" name="date">
             </div>
         </div>
     </div>
 
-    <!-- What -->
+    <!-- Category -->
     <div class="card">
-        <div class="section-label">Что передать <span style="color:var(--error)">*</span></div>
+        <div class="card-header">Что передать <span class="req">*</span></div>
         <div class="cat-grid">
-            <button type="button" class="cat-btn" onclick="selectCat('Посылка', this)">
-                <span class="cat-icon">📦</span>Посылка
-            </button>
-            <button type="button" class="cat-btn" onclick="selectCat('Документы', this)">
-                <span class="cat-icon">📄</span>Документы
-            </button>
-            <button type="button" class="cat-btn" onclick="selectCat('Животные', this)">
-                <span class="cat-icon">🐾</span>Животные
-            </button>
-            <button type="button" class="cat-btn" onclick="selectCat('Вещи', this)">
-                <span class="cat-icon">🎒</span>Вещи
-            </button>
-            <button type="button" class="cat-btn" onclick="selectCat('Другое', this)">
-                <span class="cat-icon">📮</span>Другое
-            </button>
+            <button type="button" class="cat-btn" onclick="selectCat('Посылка',this)"><span class="ci">📦</span>Посылка</button>
+            <button type="button" class="cat-btn" onclick="selectCat('Документы',this)"><span class="ci">📄</span>Документы</button>
+            <button type="button" class="cat-btn" onclick="selectCat('Животные',this)"><span class="ci">🐾</span>Животные</button>
+            <button type="button" class="cat-btn" onclick="selectCat('Вещи',this)"><span class="ci">🎒</span>Вещи</button>
+            <button type="button" class="cat-btn" onclick="selectCat('Другое',this)"><span class="ci">📮</span>Другое</button>
         </div>
-        <!-- Hidden select for form -->
         <select id="what" name="what" required tabindex="-1" aria-hidden="true">
             <option value=""></option>
             <option value="Посылка">Посылка</option>
@@ -688,22 +555,28 @@
 
     <!-- Details -->
     <div class="card">
-        <div class="section-label">Детали</div>
-        <div class="field">
-            <div class="field-label">Вес / габариты</div>
-            <div class="input-wrap">
-                <span class="input-icon">⚖️</span>
-                <input type="text" id="weight" name="weight" placeholder="Например: 5 кг, 30×40 см">
+        <div class="card-header" style="padding-bottom:2px">Детали</div>
+
+        <div class="field-row">
+            <span class="field-icon">⚖️</span>
+            <div class="field-inner">
+                <div class="field-label">Вес / габариты</div>
+                <input type="text" id="weight" name="weight" placeholder="5 кг, 30×40 см...">
             </div>
         </div>
-        <div class="field">
-            <div class="field-label">Комментарий</div>
-            <textarea id="comment" name="comment" class="no-icon" placeholder="Дополнительная информация..." style="padding-left:14px"></textarea>
+
+        <div class="field-row" style="align-items:flex-start; padding-top:10px; padding-bottom:10px;">
+            <span class="field-icon" style="margin-top:2px">💬</span>
+            <div class="field-inner">
+                <div class="field-label">Комментарий</div>
+                <textarea id="comment" name="comment" placeholder="Дополнительная информация..."></textarea>
+            </div>
         </div>
-        <div class="field">
-            <div class="field-label">Контакт</div>
-            <div class="input-wrap">
-                <span class="input-icon">💬</span>
+
+        <div class="field-row">
+            <span class="field-icon">📱</span>
+            <div class="field-inner">
+                <div class="field-label">Контакт</div>
                 <input type="text" id="contact" name="contact" placeholder="Telegram @username или телефон">
             </div>
         </div>
@@ -711,319 +584,251 @@
 
     <!-- Photo -->
     <div class="card">
-        <div class="section-label">Фото</div>
+        <div class="card-header">Фото</div>
         <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
             <div class="photo-upload-icon">📸</div>
             <div class="photo-upload-text">Прикрепить фото</div>
-            <div class="photo-upload-hint">Заявки с фото проходят модерацию</div>
+            <div class="photo-upload-hint">Заявки с фото проходят ручную модерацию</div>
             <input type="file" id="photoInput" name="photos" accept="image/*" multiple>
         </div>
         <div id="photoPreview" class="photo-preview"></div>
     </div>
 
-    <!-- Hidden fields + Submit -->
-    <form id="submissionForm" style="display:none">
-        <input type="hidden" id="typeField" name="type">
-        <input type="hidden" id="fromCityField" name="from_city">
-        <input type="hidden" id="toCityField" name="to_city">
-        <input type="hidden" id="dateField" name="date">
-        <input type="hidden" id="whatField" name="what">
-        <input type="hidden" id="weightField" name="weight">
-        <input type="hidden" id="commentField" name="comment">
-        <input type="hidden" id="contactField" name="contact">
-    </form>
-
+    <!-- Submit -->
     <div class="submit-wrap">
-        <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
-            Отправить заявку
-        </button>
+        <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">Отправить заявку</button>
     </div>
 
-    <!-- VK Block Overlay -->
-    <div id="vkBlockOverlay" class="overlay-screen">
-        <div class="overlay-card">
-            <div class="overlay-icon">🔒</div>
-            <div class="overlay-title">Доступ ограничен</div>
-            <div class="overlay-text">Откройте приложение через ВКонтакте для отправки заявок</div>
-        </div>
+</div>
+
+<!-- VK Block -->
+<div id="vkBlockOverlay" class="overlay">
+    <div class="overlay-box">
+        <div class="ov-icon">🔒</div>
+        <div class="ov-title">Доступ ограничен</div>
+        <div class="ov-text">Откройте приложение через ВКонтакте для отправки заявок</div>
     </div>
+</div>
 
-    <!-- Admin Password Overlay -->
-    <div id="adminPasswordOverlay" class="overlay-screen">
-        <div class="overlay-card">
-            <div class="overlay-icon">🔑</div>
-            <div class="overlay-title">Вход для администратора</div>
-            <div class="overlay-text" style="margin-bottom:20px">Введите ключ доступа</div>
-            <input id="adminKeyInput" type="password" class="overlay-input" placeholder="Ключ доступа"
-                   onkeydown="if(event.key==='Enter') submitAdminKey()">
-            <div id="adminKeyError" class="overlay-error">Неверный ключ. Попробуйте ещё раз.</div>
-            <button class="overlay-btn" onclick="submitAdminKey()">Войти</button>
-        </div>
+<!-- Admin Login -->
+<div id="adminPasswordOverlay" class="overlay">
+    <div class="overlay-box">
+        <div class="ov-icon">🔑</div>
+        <div class="ov-title">Администратор</div>
+        <div class="ov-text">Введите ключ доступа</div>
+        <input id="adminKeyInput" type="password" class="ov-input" placeholder="Ключ доступа"
+               onkeydown="if(event.key==='Enter')submitAdminKey()">
+        <div id="adminKeyError" class="ov-error">Неверный ключ. Попробуйте ещё раз.</div>
+        <button class="ov-btn" onclick="submitAdminKey()">Войти</button>
     </div>
+</div>
 
-    <!-- Toast -->
-    <div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
-    <div id="toast" class="toast">
-        <div class="toast-icon" id="toastIcon"></div>
-        <div class="toast-message" id="toastMessage"></div>
-        <button class="toast-close" onclick="closeToast()">Закрыть</button>
-    </div>
+<!-- Toast -->
+<div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
+<div id="toast" class="toast">
+    <div class="toast-icon" id="toastIcon"></div>
+    <div class="toast-message" id="toastMessage"></div>
+    <button class="toast-close" onclick="closeToast()">Закрыть</button>
+</div>
 
-    <script>
-        vkBridge.send('VKWebAppInit');
+<script>
+    vkBridge.send('VKWebAppInit');
 
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:8000'
-            : 'https://nontravelling-margene-unwarming.ngrok-free.dev';
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8000'
+        : 'https://nontravelling-margene-unwarming.ngrok-free.dev';
 
-        // ── VK access check ──
-        const urlParams = new URLSearchParams(window.location.search);
-        const isFromVK = urlParams.has('vk_user_id');
-        const isLocal  = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const hasAdminHash = window.location.hash === '#admin';
-        let isAdmin = sessionStorage.getItem('admin_key') !== null;
+    // ── Access control ──
+    const urlParams = new URLSearchParams(window.location.search);
+    const isFromVK = urlParams.has('vk_user_id');
+    const isLocal  = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const hasAdminHash = window.location.hash === '#admin';
+    let isAdmin = sessionStorage.getItem('admin_key') !== null;
 
-        if (!isFromVK && !isLocal) {
-            if (isAdmin) {
-                // already verified
-            } else if (hasAdminHash) {
-                document.getElementById('adminPasswordOverlay').style.display = 'flex';
-                setTimeout(() => document.getElementById('adminKeyInput').focus(), 100);
+    if (!isFromVK && !isLocal) {
+        if (isAdmin) { /* already in */ }
+        else if (hasAdminHash) {
+            document.getElementById('adminPasswordOverlay').style.display = 'flex';
+            setTimeout(() => document.getElementById('adminKeyInput').focus(), 100);
+        } else {
+            document.getElementById('vkBlockOverlay').style.display = 'flex';
+        }
+    }
+
+    async function submitAdminKey() {
+        const key = document.getElementById('adminKeyInput').value.trim();
+        if (!key) return;
+        const fd = new FormData();
+        fd.append('admin_key', key);
+        try {
+            const r = await fetch(`${API_URL}/api/admin/verify`, { method: 'POST', body: fd });
+            if (r.ok) {
+                sessionStorage.setItem('admin_key', key);
+                isAdmin = true;
+                document.getElementById('adminPasswordOverlay').style.display = 'none';
             } else {
-                document.getElementById('vkBlockOverlay').style.display = 'flex';
-            }
-        }
-
-        async function submitAdminKey() {
-            const key = document.getElementById('adminKeyInput').value.trim();
-            if (!key) return;
-            const fd = new FormData();
-            fd.append('admin_key', key);
-            try {
-                const r = await fetch(`${API_URL}/api/admin/verify`, { method: 'POST', body: fd });
-                if (r.ok) {
-                    sessionStorage.setItem('admin_key', key);
-                    isAdmin = true;
-                    document.getElementById('adminPasswordOverlay').style.display = 'none';
-                } else {
-                    document.getElementById('adminKeyError').style.display = 'block';
-                    document.getElementById('adminKeyInput').value = '';
-                    document.getElementById('adminKeyInput').focus();
-                }
-            } catch(e) {
-                document.getElementById('adminKeyError').textContent = 'Ошибка соединения';
                 document.getElementById('adminKeyError').style.display = 'block';
+                document.getElementById('adminKeyInput').value = '';
+                document.getElementById('adminKeyInput').focus();
             }
+        } catch {
+            document.getElementById('adminKeyError').textContent = 'Ошибка соединения';
+            document.getElementById('adminKeyError').style.display = 'block';
         }
+    }
 
-        // ── VK User ID ──
-        let vkUserId = null;
-        vkBridge.send('VKWebAppGetUserInfo')
-            .then(data => { vkUserId = data.id; })
-            .catch(() => {});
+    // ── VK User ──
+    let vkUserId = null;
+    vkBridge.send('VKWebAppGetUserInfo').then(d => { vkUserId = d.id; }).catch(() => {});
 
-        // ── Type selection ──
-        let selectedType = '';
-        function selectType(val) {
-            selectedType = val;
-            document.getElementById('typeBtnSend').classList.toggle('active', val === 'Могу передать');
-            document.getElementById('typeBtnNeed').classList.toggle('active', val === 'Нужно передать');
-        }
+    // ── Type ──
+    let selectedType = '';
+    function selectType(v) {
+        selectedType = v;
+        document.getElementById('typeBtnSend').classList.toggle('active', v === 'Могу передать');
+        document.getElementById('typeBtnNeed').classList.toggle('active', v === 'Нужно передать');
+    }
 
-        // ── Category selection ──
-        let selectedCat = '';
-        function selectCat(val, el) {
-            selectedCat = val;
-            document.getElementById('what').value = val;
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-        }
+    // ── Category ──
+    let selectedCat = '';
+    function selectCat(v, el) {
+        selectedCat = v;
+        document.getElementById('what').value = v;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
 
-        // ── City Autocomplete ──
-        let citySearchTimeout = null;
-        let activeDropdown = null;
+    // ── City autocomplete ──
+    let cityTimer = null, activeDD = null;
 
-        function setupCityAutocomplete(inputId, dropdownId) {
-            const input = document.getElementById(inputId);
-            const dropdown = document.getElementById(dropdownId);
+    function setupCity(inputId, dropId) {
+        const input = document.getElementById(inputId);
+        const drop  = document.getElementById(dropId);
 
-            input.addEventListener('input', function() {
-                const value = this.value.trim();
-                clearTimeout(citySearchTimeout);
-                dropdown.innerHTML = '';
+        input.addEventListener('input', function() {
+            const v = this.value.trim();
+            clearTimeout(cityTimer);
+            drop.innerHTML = '';
+            if (v.length < 2) { drop.classList.remove('show'); activeDD = null; return; }
+            drop.innerHTML = '<div class="city-loading">Поиск...</div>';
+            drop.classList.add('show'); activeDD = drop;
 
-                if (value.length < 2) {
-                    dropdown.classList.remove('show');
-                    activeDropdown = null;
-                    return;
-                }
-
-                dropdown.innerHTML = '<div class="city-loading">Поиск...</div>';
-                dropdown.classList.add('show');
-                activeDropdown = dropdown;
-
-                citySearchTimeout = setTimeout(async () => {
-                    try {
-                        const r = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}&_=${Date.now()}`);
-                        const data = await r.json();
-                        dropdown.innerHTML = '';
-
-                        if (data.cities && data.cities.length > 0) {
-                            data.cities.forEach(city => {
-                                const item = document.createElement('div');
-                                item.className = 'city-item';
-                                item.textContent = city;
-                                const selectCity = (e) => {
-                                    if (e) { e.preventDefault(); e.stopPropagation(); }
-                                    input.value = city;
-                                    dropdown.classList.remove('show');
-                                    dropdown.innerHTML = '';
-                                    activeDropdown = null;
-                                };
-                                item.addEventListener('pointerdown', selectCity);
-                                item.addEventListener('click', selectCity);
-                                dropdown.appendChild(item);
-                            });
-                            dropdown.classList.add('show');
-                            activeDropdown = dropdown;
-                        } else {
-                            dropdown.innerHTML = '<div class="city-loading">Ничего не найдено</div>';
-                        }
-                    } catch {
-                        dropdown.innerHTML = '<div class="city-loading">Ошибка поиска</div>';
+            cityTimer = setTimeout(async () => {
+                try {
+                    const r = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(v)}&_=${Date.now()}`);
+                    const data = await r.json();
+                    drop.innerHTML = '';
+                    if (data.cities && data.cities.length) {
+                        data.cities.forEach(city => {
+                            const el = document.createElement('div');
+                            el.className = 'city-item';
+                            el.textContent = city;
+                            const pick = e => { e && (e.preventDefault(), e.stopPropagation()); input.value = city; drop.classList.remove('show'); drop.innerHTML = ''; activeDD = null; };
+                            el.addEventListener('pointerdown', pick);
+                            el.addEventListener('click', pick);
+                            drop.appendChild(el);
+                        });
+                        drop.classList.add('show'); activeDD = drop;
+                    } else {
+                        drop.innerHTML = '<div class="city-loading">Ничего не найдено</div>';
                     }
-                }, 400);
-            });
-
-            input.addEventListener('blur', () => {
-                setTimeout(() => {
-                    if (activeDropdown === dropdown) { dropdown.classList.remove('show'); activeDropdown = null; }
-                }, 300);
-            });
-
-            input.addEventListener('focus', () => {
-                if (input.value.length >= 2 && dropdown.children.length > 0) {
-                    dropdown.classList.add('show'); activeDropdown = dropdown;
-                }
-            });
-        }
-
-        setupCityAutocomplete('fromCity', 'fromCityDropdown');
-        setupCityAutocomplete('toCity', 'toCityDropdown');
-
-        // ── Photo Preview ──
-        document.getElementById('photoInput').addEventListener('change', function() {
-            const preview = document.getElementById('photoPreview');
-            preview.innerHTML = '';
-            for (const file of this.files) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    preview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
+                } catch { drop.innerHTML = '<div class="city-loading">Ошибка поиска</div>'; }
+            }, 380);
         });
 
-        // ── Toast ──
-        function showToast(message, type) {
-            const toast = document.getElementById('toast');
-            const icons = { success: '✅', error: '❌', warning: '⏳' };
-            toast.className = 'toast ' + type;
-            document.getElementById('toastIcon').textContent = icons[type] || '📮';
-            document.getElementById('toastMessage').textContent = message;
-            document.getElementById('toastOverlay').classList.add('show');
-            toast.classList.add('show');
+        input.addEventListener('blur', () => setTimeout(() => { if (activeDD === drop) { drop.classList.remove('show'); activeDD = null; } }, 280));
+        input.addEventListener('focus', () => { if (input.value.length >= 2 && drop.children.length) { drop.classList.add('show'); activeDD = drop; } });
+    }
+
+    setupCity('fromCity', 'fromCityDropdown');
+    setupCity('toCity',   'toCityDropdown');
+
+    // ── Photos ──
+    document.getElementById('photoInput').addEventListener('change', function() {
+        const preview = document.getElementById('photoPreview');
+        preview.innerHTML = '';
+        for (const file of this.files) {
+            const reader = new FileReader();
+            reader.onload = e => { const img = document.createElement('img'); img.src = e.target.result; preview.appendChild(img); };
+            reader.readAsDataURL(file);
         }
+    });
 
-        function closeToast() {
-            document.getElementById('toast').classList.remove('show');
-            document.getElementById('toastOverlay').classList.remove('show');
+    // ── Toast ──
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        const icons = { success: '✅', error: '❌', warning: '⏳' };
+        t.className = 'toast ' + type;
+        document.getElementById('toastIcon').textContent = icons[type] || '📮';
+        document.getElementById('toastMessage').textContent = msg;
+        document.getElementById('toastOverlay').classList.add('show');
+        t.classList.add('show');
+    }
+
+    function closeToast() {
+        document.getElementById('toast').classList.remove('show');
+        document.getElementById('toastOverlay').classList.remove('show');
+    }
+
+    // ── Submit ──
+    async function handleSubmit() {
+        if (!selectedType)  { showToast('Выберите тип заявки', 'error'); return; }
+        const from = document.getElementById('fromCity').value.trim();
+        const to   = document.getElementById('toCity').value.trim();
+        if (!from) { showToast('Укажите город отправления', 'error'); return; }
+        if (!to)   { showToast('Укажите город назначения', 'error'); return; }
+        if (!selectedCat) { showToast('Выберите категорию груза', 'error'); return; }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.textContent = 'Отправка...';
+
+        const fd = new FormData();
+        fd.append('type', selectedType);
+        fd.append('from_city', from);
+        fd.append('to_city', to);
+        fd.append('what', selectedCat);
+
+        const date    = document.getElementById('date').value;
+        const weight  = document.getElementById('weight').value.trim();
+        const comment = document.getElementById('comment').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+        if (date)    fd.append('date', date);
+        if (weight)  fd.append('weight', weight);
+        if (comment) fd.append('comment', comment);
+        if (contact) fd.append('contact', contact);
+
+        if (vkUserId) fd.append('vk_user_id', vkUserId);
+        if (isAdmin)  fd.append('admin_key', sessionStorage.getItem('admin_key'));
+        else          fd.append('vk_launch_params', window.location.search);
+
+        for (const p of document.getElementById('photoInput').files) fd.append('photos', p);
+
+        try {
+            const res = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const result = await res.json();
+
+            if (result.status === 'published')     { showToast('Заявка опубликована!', 'success'); resetForm(); }
+            else if (result.status === 'manual')   { showToast('Заявка отправлена на модерацию', 'warning'); resetForm(); }
+            else if (result.status === 'rejected') { showToast(result.message || 'Заявка отклонена', 'error'); }
+            else                                   { showToast(result.message || 'Неизвестный статус', 'error'); }
+        } catch (e) {
+            console.error(e);
+            showToast('Ошибка отправки. Проверьте соединение.', 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = 'Отправить заявку';
         }
+    }
 
-        // ── Submit ──
-        async function handleSubmit() {
-            // Validate
-            if (!selectedType) { showToast('Выберите тип заявки', 'error'); return; }
-            const fromCity = document.getElementById('fromCity').value.trim();
-            const toCity   = document.getElementById('toCity').value.trim();
-            if (!fromCity) { showToast('Укажите город отправления', 'error'); return; }
-            if (!toCity)   { showToast('Укажите город назначения', 'error'); return; }
-            if (!selectedCat) { showToast('Выберите категорию груза', 'error'); return; }
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Отправка...';
-
-            const formData = new FormData();
-            formData.append('type', selectedType);
-            formData.append('from_city', fromCity);
-            formData.append('to_city', toCity);
-
-            const date    = document.getElementById('date').value;
-            const weight  = document.getElementById('weight').value.trim();
-            const comment = document.getElementById('comment').value.trim();
-            const contact = document.getElementById('contact').value.trim();
-            if (date)    formData.append('date', date);
-            if (weight)  formData.append('weight', weight);
-            if (comment) formData.append('comment', comment);
-            if (contact) formData.append('contact', contact);
-            formData.append('what', selectedCat);
-
-            if (vkUserId) formData.append('vk_user_id', vkUserId);
-
-            if (isAdmin) {
-                formData.append('admin_key', sessionStorage.getItem('admin_key'));
-            } else {
-                formData.append('vk_launch_params', window.location.search);
-            }
-
-            // Photos
-            const photos = document.getElementById('photoInput').files;
-            for (const p of photos) formData.append('photos', p);
-
-            try {
-                const response = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: formData });
-
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const result = await response.json();
-
-                if (result.status === 'published') {
-                    showToast('Заявка успешно опубликована!', 'success');
-                    resetForm();
-                } else if (result.status === 'manual') {
-                    showToast('Заявка отправлена на модерацию', 'warning');
-                    resetForm();
-                } else if (result.status === 'rejected') {
-                    showToast(result.message || 'Заявка отклонена', 'error');
-                } else {
-                    showToast(result.message || 'Неизвестный статус', 'error');
-                }
-            } catch (e) {
-                console.error(e);
-                showToast('Ошибка отправки. Проверьте соединение.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Отправить заявку';
-            }
-        }
-
-        function resetForm() {
-            selectedType = ''; selectedCat = '';
-            document.getElementById('typeBtnSend').classList.remove('active');
-            document.getElementById('typeBtnNeed').classList.remove('active');
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('fromCity').value = '';
-            document.getElementById('toCity').value = '';
-            document.getElementById('date').value = '';
-            document.getElementById('weight').value = '';
-            document.getElementById('comment').value = '';
-            document.getElementById('contact').value = '';
-            document.getElementById('what').value = '';
-            document.getElementById('photoInput').value = '';
-            document.getElementById('photoPreview').innerHTML = '';
-        }
-    </script>
+    function resetForm() {
+        selectedType = ''; selectedCat = '';
+        ['typeBtnSend','typeBtnNeed'].forEach(id => document.getElementById(id).classList.remove('active'));
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        ['fromCity','toCity','date','weight','comment','contact'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('what').value = '';
+        document.getElementById('photoInput').value = '';
+        document.getElementById('photoPreview').innerHTML = '';
+    }
+</script>
 </body>
 </html>
