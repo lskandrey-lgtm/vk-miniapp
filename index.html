@@ -443,6 +443,17 @@
         </div>
     </div>
 
+    <div id="adminPasswordOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index:99999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px; box-sizing:border-box;">
+        <div style="background:white; border-radius:24px; padding:40px; max-width:320px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:48px; margin-bottom:16px;">🔑</div>
+            <h2 style="font-size:20px; font-weight:700; color:#1a1a1a; margin-bottom:8px;">Вход для администратора</h2>
+            <p style="color:#666; font-size:14px; margin-bottom:20px;">Введите ключ доступа</p>
+            <input id="adminKeyInput" type="password" placeholder="Ключ доступа" style="width:100%; padding:12px 16px; border:2px solid #e1e8ed; border-radius:12px; font-size:15px; margin-bottom:12px; box-sizing:border-box;" onkeydown="if(event.key==='Enter') submitAdminKey()">
+            <div id="adminKeyError" style="color:#e74c3c; font-size:13px; margin-bottom:12px; display:none;">Неверный ключ</div>
+            <button onclick="submitAdminKey()" style="width:100%; padding:14px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer;">Войти</button>
+        </div>
+    </div>
+
     <div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
 
     <div id="toast" class="toast">
@@ -463,11 +474,41 @@
         // VK access check
         const urlParams = new URLSearchParams(window.location.search);
         const isFromVK = urlParams.has('vk_user_id');
-        const isAdmin = urlParams.get('admin') === 'bsdF1';
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const hasAdminHash = window.location.hash === '#admin';
+        let isAdmin = sessionStorage.getItem('admin_key') !== null;
 
-        if (!isFromVK && !isAdmin && !isLocal) {
-            document.getElementById('vkBlockOverlay').style.display = 'flex';
+        if (!isFromVK && !isLocal) {
+            if (isAdmin) {
+                // already verified, nothing to show
+            } else if (hasAdminHash) {
+                document.getElementById('adminPasswordOverlay').style.display = 'flex';
+                setTimeout(() => document.getElementById('adminKeyInput').focus(), 100);
+            } else {
+                document.getElementById('vkBlockOverlay').style.display = 'flex';
+            }
+        }
+
+        async function submitAdminKey() {
+            const key = document.getElementById('adminKeyInput').value.trim();
+            if (!key) return;
+            const fd = new FormData();
+            fd.append('admin_key', key);
+            fd.append('type', 'test'); fd.append('from_city', 'test'); fd.append('to_city', 'test'); fd.append('what', 'test');
+            try {
+                const r = await fetch(`${API_URL}/api/admin/verify`, { method: 'POST', body: fd });
+                if (r.ok) {
+                    sessionStorage.setItem('admin_key', key);
+                    isAdmin = true;
+                    document.getElementById('adminPasswordOverlay').style.display = 'none';
+                } else {
+                    document.getElementById('adminKeyError').style.display = 'block';
+                    document.getElementById('adminKeyInput').value = '';
+                }
+            } catch(e) {
+                document.getElementById('adminKeyError').textContent = 'Ошибка соединения';
+                document.getElementById('adminKeyError').style.display = 'block';
+            }
         }
 
         let vkUserId = null;
@@ -635,7 +676,7 @@
             }
 
             if (isAdmin) {
-                formData.append('admin_key', 'bsdF1');
+                formData.append('admin_key', sessionStorage.getItem('admin_key'));
             } else {
                 formData.append('vk_launch_params', window.location.search);
             }
