@@ -489,15 +489,8 @@
                     try {
                         console.log('Поиск городов:', value);
                         const cacheBuster = new Date().getTime();
-                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}&_=${cacheBuster}`, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'ngrok-skip-browser-warning': 'true',
-                                'Cache-Control': 'no-cache'
-                            }
-                        });
+                        // Без кастомных headers - чтобы избежать CORS preflight (он медленный на ngrok)
+                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}&_=${cacheBuster}&ngrok-skip-browser-warning=true`);
                         
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
@@ -626,11 +619,9 @@
 
             try {
                 console.log('Отправка формы...');
+                // Без кастомных headers - чтобы избежать CORS preflight
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
-                    headers: {
-                        'ngrok-skip-browser-warning': 'true'
-                    },
                     body: formData
                 });
 
