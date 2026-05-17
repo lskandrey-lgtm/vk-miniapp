@@ -743,6 +743,7 @@
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:8000'
         : 'https://nontravelling-margene-unwarming.ngrok-free.dev';
+    const NGROK_H = { 'ngrok-skip-browser-warning': '1' };
 
     // ── Access control ──
     const urlParams = new URLSearchParams(window.location.search);
@@ -767,7 +768,7 @@
         const fd = new FormData();
         fd.append('admin_key', key);
         try {
-            const r = await fetch(`${API_URL}/api/admin/verify`, { method: 'POST', body: fd });
+            const r = await fetch(`${API_URL}/api/admin/verify`, { method: 'POST', body: fd, headers: NGROK_H });
             if (r.ok) {
                 sessionStorage.setItem('admin_key', key);
                 isAdmin = true;
@@ -821,7 +822,7 @@
 
             cityTimer = setTimeout(async () => {
                 try {
-                    const r = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(v)}&_=${Date.now()}`);
+                    const r = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(v)}&_=${Date.now()}`, { headers: NGROK_H });
                     const data = await r.json();
                     drop.innerHTML = '';
                     if (data.cities && data.cities.length) {
@@ -910,7 +911,7 @@
         for (const p of document.getElementById('photoInput').files) fd.append('photos', p);
 
         try {
-            const res = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd });
+            const res = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd, headers: NGROK_H });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const result = await res.json();
 
