@@ -24,7 +24,7 @@
             --rs: 10px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
         html { overflow-x: hidden; }
 
@@ -188,15 +188,16 @@
 
         .req { color: var(--err); font-weight: 700; }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             border: none;
             outline: none;
             background: transparent;
-            font-size: 14px;
+            font-size: 16px; /* ≥16px prevents iOS auto-zoom on focus */
             font-family: inherit;
             color: var(--t1);
             padding: 0;
+            touch-action: manipulation;
         }
 
         input::placeholder, textarea::placeholder { color: var(--t3); font-weight: 400; }
@@ -241,7 +242,7 @@
 
         .city-input-wrap input {
             padding: 10px 0;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         /* City dropdown */
