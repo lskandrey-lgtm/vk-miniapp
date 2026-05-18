@@ -806,21 +806,22 @@
     }
 
     // ── City autocomplete ──
-    let cityTimer = null, activeDD = null;
+    let activeDD = null;
 
     function setupCity(inputId, dropId) {
         const input = document.getElementById(inputId);
         const drop  = document.getElementById(dropId);
+        let timer = null;  // per-input timer — prevents cross-field interference
 
         input.addEventListener('input', function() {
             const v = this.value.trim();
-            clearTimeout(cityTimer);
+            clearTimeout(timer);
             drop.innerHTML = '';
             if (v.length < 2) { drop.classList.remove('show'); activeDD = null; return; }
             drop.innerHTML = '<div class="city-loading">Поиск...</div>';
             drop.classList.add('show'); activeDD = drop;
 
-            cityTimer = setTimeout(async () => {
+            timer = setTimeout(async () => {
                 try {
                     const r = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(v)}&_=${Date.now()}`, { headers: NGROK_H });
                     const data = await r.json();
@@ -911,8 +912,14 @@
         for (const p of document.getElementById('photoInput').files) fd.append('photos', p);
 
         try {
-            const res = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd, headers: NGROK_H });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 15000);
+            const res = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd, headers: NGROK_H, signal: ctrl.signal });
+            clearTimeout(t);
+            if (!res.ok) {
+                const txt = await res.text().catch(() => '');
+                throw new Error(`HTTP ${res.status}${txt ? ': ' + txt : ''}`);
+            }
             const result = await res.json();
 
             if (result.status === 'published')     { showToast('Заявка опубликована!', 'success'); resetForm(); }
@@ -921,7 +928,8 @@
             else                                   { showToast(result.message || 'Неизвестный статус', 'error'); }
         } catch (e) {
             console.error(e);
-            showToast('Ошибка отправки. Проверьте соединение.', 'error');
+            const msg = e.name === 'AbortError' ? 'Сервер не отвечает — попробуйте ещё раз' : 'Ошибка отправки: ' + e.message;
+            showToast(msg, 'error');
         } finally {
             btn.disabled = false; btn.textContent = 'Отправить заявку';
         }
