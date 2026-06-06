@@ -3,971 +3,658 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Передача посылок</title>
+    <title>Заявка на доставку</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
-        :root {
-            --p: #5B21B6;
-            --p2: #7C3AED;
-            --p3: #A78BFA;
-            --p4: #C4B5FD;
-            --bg: #F5F3FA;
-            --card: #fff;
-            --border: #E8E4F3;
-            --t1: #1A0E33;
-            --t2: #5E5577;
-            --t3: #A9A2BC;
-            --ok: #059669;
-            --err: #DC2626;
-            --warn: #D97706;
-            --r: 16px;
-            --rs: 10px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-
-        html { overflow-x: hidden; }
+        html {
+            height: 100%;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--t1);
-            font-size: 14px;
-            line-height: 1.4;
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
+            padding: 20px;
+            overflow-y: auto;
         }
 
-        /* ── Header ── */
-        header {
-            background: linear-gradient(145deg, #2D0B6E 0%, #4C17A0 35%, #6D28D9 70%, #8B5CF6 100%);
-            padding: 12px 14px 28px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        header::before {
-            content: '';
-            position: absolute;
-            top: -40%; right: -20%;
-            width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(167,139,250,0.25) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -30%; left: -10%;
-            width: 140px; height: 140px;
-            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .logo {
-            width: 38px; height: 38px; flex-shrink: 0;
-            background: rgba(255,255,255,0.12);
-            border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(8px);
-            position: relative;
-            z-index: 1;
-        }
-
-        .logo svg { width: 22px; height: 22px; }
-
-        .header-text { flex: 1; position: relative; z-index: 1; }
-        .header-title { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
-        .header-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; font-weight: 400; }
-
-        /* ── Container ── */
-        .content {
-            margin: -10px 10px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* ── Card ── */
-        .card {
-            background: var(--card);
-            border-radius: var(--r);
-            /* overflow:hidden removed — was clipping city autocomplete dropdown */
-            box-shadow: 0 1px 3px rgba(91,33,182,0.06), 0 4px 12px rgba(91,33,182,0.04);
-            border: 1px solid var(--border);
-        }
-
-        .card-header {
-            padding: 12px 14px 0;
-            font-size: 10.5px;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: var(--t3);
-        }
-
-        /* ── Type Toggle ── */
-        .type-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            padding: 10px 14px 14px;
-        }
-
-        .type-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            padding: 11px 10px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--rs);
-            background: var(--bg);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--t2);
-            transition: all 0.18s ease;
-            user-select: none;
-            -webkit-user-select: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .type-btn .ti { font-size: 17px; line-height: 1; }
-
-        .type-btn:active { transform: scale(0.97); }
-
-        .type-btn.active {
-            border-color: var(--p2);
-            background: linear-gradient(135deg, #EDE9FE 0%, #F3EFFE 100%);
-            color: var(--p);
-            box-shadow: 0 0 0 1px rgba(124,58,237,0.1), 0 2px 8px rgba(124,58,237,0.1);
-        }
-
-        /* ── Fields ── */
-        .field-row {
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            border-bottom: 1px solid var(--border);
-            min-height: 44px;
-            gap: 10px;
-        }
-
-        .field-row:last-child { border-bottom: none; }
-
-        .field-icon {
-            font-size: 15px;
-            flex-shrink: 0;
-            width: 20px;
-            text-align: center;
-            opacity: 0.85;
-        }
-
-        .field-inner { flex: 1; min-width: 0; }
-
-        .field-label {
-            font-size: 10.5px;
-            font-weight: 600;
-            color: var(--t3);
-            margin-bottom: 1px;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            letter-spacing: 0.2px;
-        }
-
-        .req { color: var(--err); font-weight: 700; }
-
-        input, textarea, select {
+        .container {
+            max-width: 500px;
             width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 16px; /* ≥16px prevents iOS auto-zoom on focus */
-            font-family: inherit;
-            color: var(--t1);
-            padding: 0;
-            touch-action: manipulation;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
         }
 
-        input::placeholder, textarea::placeholder { color: var(--t3); font-weight: 400; }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .required::after {
+            content: " *";
+            color: #ff4757;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
 
         textarea {
-            resize: none;
-            min-height: 36px;
-            padding: 2px 0;
-            line-height: 1.5;
+            resize: vertical;
+            min-height: 80px;
         }
 
-        input[type="date"] { color: var(--t1); }
-
-        /* ── Route card highlight ── */
-        .card-route {
-            background: linear-gradient(160deg, #F3EFFE 0%, #FAF8FF 100%);
-            border-color: #D8D0F5;
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+            font-style: italic;
         }
 
-        .card-route .field-row {
-            border-bottom-color: #E2DBF5;
-        }
-
-        .city-input-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #fff;
-            border: 1.5px solid var(--border);
-            border-radius: var(--rs);
-            padding: 0 10px;
-            margin: 8px 0;
-            transition: border-color 0.15s, box-shadow 0.15s;
-        }
-
-        .city-input-wrap:focus-within {
-            border-color: var(--p2);
-            box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
-        }
-
-        .city-input-wrap .ci-icon { font-size: 15px; flex-shrink: 0; }
-
-        .city-input-wrap input {
-            padding: 10px 0;
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 24px;
         }
 
-        /* City dropdown */
-        .city-wrap { position: relative; flex: 1; min-width: 0; }
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .photo-upload {
+            border: 2px dashed #e1e8ed;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .photo-upload:hover {
+            border-color: #667eea;
+            background: white;
+        }
+
+        .photo-upload-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .photo-upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .photo-upload input {
+            display: none;
+        }
+
+        .photo-preview {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e1e8ed;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 10000;
+            min-width: 320px;
+            max-width: 90%;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .toast.success {
+            border-top: 4px solid #2ecc71;
+        }
+
+        .toast.error {
+            border-top: 4px solid #e74c3c;
+        }
+
+        .toast.warning {
+            border-top: 4px solid #f39c12;
+        }
+
+        .toast-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: bounceIn 0.6s;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .toast-message {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .toast-close {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .toast-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .toast-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         .city-dropdown {
             position: absolute;
-            top: calc(100% + 4px);
+            top: 100%;
             left: 0;
             right: 0;
             max-height: 200px;
             overflow-y: auto;
-            background: #fff;
-            border: 1.5px solid var(--p2);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(91,33,182,0.16);
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             z-index: 100;
-            opacity: 0;
-            transform: translateY(-6px);
-            pointer-events: none;
-            transition: opacity 0.15s ease, transform 0.15s ease;
+            display: none;
+            margin-top: -2px;
+        }
+
+        .city-dropdown.show {
             display: block;
         }
 
-        .city-dropdown.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-
         .city-item {
-            padding: 11px 14px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
             font-size: 14px;
-            color: var(--t1);
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-
-        .city-item:last-child { border-bottom: none; }
-        .city-item:active { background: #F5F3FF; }
-        .city-item mark { background: none; color: var(--p); font-weight: 700; }
-        .city-loading { padding: 11px 14px; color: var(--t3); font-size: 13px; }
-
-        /* Route connector */
-        .route-divider {
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            gap: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .route-divider .field-icon { opacity: 0; }
-
-        .route-arrow {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 0;
-        }
-
-        .route-arrow-line {
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, var(--p4), var(--p3), transparent);
-        }
-
-        .route-arrow-dot {
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--p), var(--p2));
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(124,58,237,0.3);
-        }
-
-        .route-arrow-dot svg {
-            width: 12px; height: 12px;
-            stroke: #fff; stroke-width: 2.5;
-            stroke-linecap: round; stroke-linejoin: round;
-            fill: none;
-        }
-
-        /* ── Category Grid ── */
-        .cat-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            padding: 10px 14px 14px;
-        }
-
-        .cat-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 10px 4px 8px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--rs);
-            background: var(--bg);
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--t2);
-            transition: all 0.18s ease;
+            -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
             user-select: none;
             -webkit-user-select: none;
         }
 
-        .cat-btn .ci { font-size: 20px; line-height: 1; }
-
-        .cat-btn:active { transform: scale(0.95); }
-
-        .cat-btn.active {
-            border-color: var(--p2);
-            background: linear-gradient(135deg, #EDE9FE 0%, #F3EFFE 100%);
-            color: var(--p);
-            box-shadow: 0 0 0 1px rgba(124,58,237,0.08), 0 2px 6px rgba(124,58,237,0.1);
+        .city-item:hover {
+            background: #f8f9fa;
+            padding-left: 20px;
         }
 
-        #what { display: none; }
+        .city-item:active {
+            background: #e8e9fa;
+        }
 
-        /* ── Photo Upload ── */
-        .photo-upload {
-            margin: 10px 14px 14px;
-            border: 1.5px dashed var(--p4);
-            border-radius: 12px;
-            padding: 16px 14px;
+        .city-item:last-child {
+            border-bottom: none;
+        }
+
+        .city-loading {
+            padding: 12px;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: linear-gradient(135deg, #FAFAFF 0%, #F5F3FA 100%);
-        }
-
-        .photo-upload:active {
-            border-color: var(--p2);
-            background: #EDE9FE;
-            transform: scale(0.99);
-        }
-
-        .photo-upload input { display: none; }
-        .photo-upload-icon { font-size: 22px; margin-bottom: 4px; }
-        .photo-upload-text { font-size: 13px; color: var(--t2); font-weight: 600; }
-        .photo-upload-hint { font-size: 11px; color: var(--t3); margin-top: 3px; font-weight: 400; }
-
-        .photo-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
-            gap: 6px;
-            padding: 0 14px 14px;
-        }
-
-        .photo-preview img {
-            width: 100%; aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        /* ── Submit ── */
-        .submit-wrap { padding: 4px 10px 0; }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #3B0F9E 0%, #5B21B6 40%, #7C3AED 100%);
-            color: #fff;
-            border: none;
-            border-radius: var(--r);
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(91,33,182,0.3), 0 1px 3px rgba(91,33,182,0.2);
-            transition: all 0.2s ease;
-            letter-spacing: 0.1px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .submit-btn::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .submit-btn:active { transform: scale(0.985); opacity: 0.92; }
-        .submit-btn:disabled { background: #C4BFD8; box-shadow: none; transform: none; cursor: not-allowed; }
-        .submit-btn:disabled::after { display: none; }
-
-        /* ── Toast ── */
-        .toast-overlay {
-            position: fixed; inset: 0;
-            background: rgba(18,8,38,0.5);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            z-index: 9000;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.25s ease;
-        }
-
-        .toast-overlay.show { opacity: 1; pointer-events: auto; }
-
-        .toast {
-            position: fixed;
-            bottom: 16px; left: 10px; right: 10px;
-            background: #fff;
-            border-radius: 20px;
-            padding: 24px 20px;
-            z-index: 9001;
-            text-align: center;
-            transform: translateY(130%);
-            opacity: 0;
-            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s ease;
-            pointer-events: none;
-            box-shadow: 0 12px 40px rgba(18,8,38,0.18), 0 2px 8px rgba(18,8,38,0.08);
-        }
-
-        .toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-        .toast.success { border-top: 3px solid var(--ok); }
-        .toast.error   { border-top: 3px solid var(--err); }
-        .toast.warning { border-top: 3px solid var(--warn); }
-
-        .toast-icon { font-size: 38px; margin-bottom: 10px; }
-        .toast-message { font-size: 14px; color: var(--t1); line-height: 1.5; margin-bottom: 16px; font-weight: 500; }
-
-        .toast-close {
-            padding: 10px 28px;
-            background: linear-gradient(135deg, var(--p), var(--p2));
-            color: #fff;
-            border: none;
-            border-radius: 10px;
+            color: #999;
             font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.15s;
         }
 
-        .toast-close:active { opacity: 0.85; }
-
-        /* ── Overlays ── */
-        .overlay {
-            position: fixed; inset: 0;
-            background: linear-gradient(160deg, #1E0651 0%, #3B0F9E 40%, #6D28D9 80%, #8B5CF6 100%);
-            z-index: 99999;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+        .emoji-icon {
+            font-size: 20px;
+            margin-right: 8px;
         }
 
-        .overlay-box {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 24px;
-            padding: 36px 24px;
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.2);
-        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
 
-        .ov-icon { font-size: 44px; margin-bottom: 16px; }
-        .ov-title { font-size: 19px; font-weight: 800; color: #fff; margin-bottom: 6px; letter-spacing: -0.3px; }
-        .ov-text  { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+            .container {
+                padding: 24px;
+                border-radius: 20px;
+                margin-bottom: 60px;
+            }
 
-        .ov-input {
-            width: 100%; margin-top: 20px;
-            padding: 13px 14px;
-            border: 1.5px solid rgba(255,255,255,0.2);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-            font-size: 14px;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s, background 0.2s;
-            box-sizing: border-box;
-        }
+            h1 {
+                font-size: 24px;
+            }
 
-        .ov-input::placeholder { color: rgba(255,255,255,0.35); }
-        .ov-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.12); }
-
-        .ov-error {
-            font-size: 12px;
-            color: #FCA5A5;
-            margin-top: 6px;
-            display: none;
-            text-align: left;
-        }
-
-        .ov-btn {
-            width: 100%; margin-top: 14px;
-            padding: 13px;
-            background: #fff;
-            color: var(--p);
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.15s;
-            font-family: inherit;
-        }
-
-        .ov-btn:active { opacity: 0.85; transform: scale(0.98); }
-
-        /* ── Responsive ── */
-        @media (min-width: 520px) {
-            body { background: #E5E1F5; }
-            .content { max-width: 440px; margin-left: auto; margin-right: auto; }
-            .submit-wrap { max-width: 440px; margin: 0 auto; }
-            header { justify-content: center; }
-        }
-
-        @media (max-width: 360px) {
-            .cat-grid { grid-template-columns: repeat(5, 1fr); gap: 5px; }
-            .cat-btn .ci { font-size: 17px; }
-            .cat-btn { font-size: 9px; padding: 8px 3px 6px; }
-            .type-btn { font-size: 12px; gap: 6px; padding: 10px 8px; }
+            input, select, textarea {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>✈️ Заявка на доставку</h1>
+        <p class="subtitle">Заполните форму ниже</p>
 
-<header>
-    <div class="logo">
-        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="5" cy="11" r="2.5" fill="none" stroke="white" stroke-width="1.5"/>
-            <circle cx="17" cy="11" r="2.5" fill="none" stroke="white" stroke-width="1.5"/>
-            <path d="M7.5 10C9 7.5 13 7.5 14.5 10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M14.5 12C13 14.5 9 14.5 7.5 12" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M13 8L14.5 10L13 12" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9 14L7.5 12L9 10" stroke="rgba(255,255,255,0.45)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    </div>
-    <div class="header-text">
-        <div class="header-title">Передача посылок</div>
-        <div class="header-sub">Найди попутчика или отправь груз</div>
-    </div>
-</header>
-
-<div class="content">
-
-    <!-- Type -->
-    <div class="card">
-        <div class="card-header">Тип заявки <span class="req">*</span></div>
-        <div class="type-row">
-            <button type="button" class="type-btn" id="typeBtnSend" onclick="selectType('Могу передать')">
-                <span class="ti">📦</span> Могу передать
-            </button>
-            <button type="button" class="type-btn" id="typeBtnNeed" onclick="selectType('Нужно передать')">
-                <span class="ti">🔍</span> Нужно передать
-            </button>
-        </div>
-    </div>
-
-    <!-- Route -->
-    <div class="card card-route">
-        <div class="card-header" style="padding-bottom:2px">Маршрут</div>
-        <div style="padding: 0 12px 4px;">
-            <div style="position:relative;">
-                <div class="city-input-wrap">
-                    <span class="ci-icon">📍</span>
-                    <div class="city-wrap">
-                        <input type="text" id="fromCity" name="from_city" placeholder="Откуда *" autocomplete="off" required>
-                        <div class="city-dropdown" id="fromCityDropdown"></div>
-                    </div>
-                </div>
+        <form id="submissionForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="required"><span class="emoji-icon">📝</span>Тип заявки</label>
+                <select id="type" name="type" required>
+                    <option value="">Выберите тип</option>
+                    <option value="Могу передать">📦 Могу передать</option>
+                    <option value="Нужно передать">🔍 Нужно передать</option>
+                </select>
             </div>
 
-            <div style="display:flex; align-items:center; gap:6px; padding: 1px 4px;">
-                <div style="flex:1; height:1px; background:linear-gradient(90deg,var(--p4),transparent);"></div>
-                <div class="route-arrow-dot">
-                    <svg viewBox="0 0 12 12" style="width:12px;height:12px;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none;"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
-                </div>
-                <div style="flex:1; height:1px; background:linear-gradient(270deg,var(--p4),transparent);"></div>
+            <div class="form-group">
+                <label class="required"><span class="emoji-icon">📍</span>Откуда</label>
+                <input type="text" id="fromCity" name="from_city" placeholder="Начните вводить город..." required autocomplete="off">
+                <div class="city-dropdown" id="fromCityDropdown"></div>
             </div>
 
-            <div style="position:relative;">
-                <div class="city-input-wrap">
-                    <span class="ci-icon">🎯</span>
-                    <div class="city-wrap">
-                        <input type="text" id="toCity" name="to_city" placeholder="Куда *" autocomplete="off" required>
-                        <div class="city-dropdown" id="toCityDropdown"></div>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label class="required"><span class="emoji-icon">🎯</span>Куда</label>
+                <input type="text" id="toCity" name="to_city" placeholder="Начните вводить город..." required autocomplete="off">
+                <div class="city-dropdown" id="toCityDropdown"></div>
             </div>
-        </div>
 
-        <div class="field-row" style="border-top: 1px solid var(--border);">
-            <span class="field-icon">📅</span>
-            <div class="field-inner">
-                <div class="field-label">Дата поездки</div>
+            <div class="form-group">
+                <label><span class="emoji-icon">📅</span>Дата</label>
                 <input type="date" id="date" name="date">
+                <div class="hint">Не обязательно</div>
             </div>
-        </div>
-    </div>
 
-    <!-- Category -->
-    <div class="card">
-        <div class="card-header">Что передать <span class="req">*</span></div>
-        <div class="cat-grid">
-            <button type="button" class="cat-btn" onclick="selectCat('Посылка',this)"><span class="ci">📦</span>Посылка</button>
-            <button type="button" class="cat-btn" onclick="selectCat('Документы',this)"><span class="ci">📄</span>Документы</button>
-            <button type="button" class="cat-btn" onclick="selectCat('Животные',this)"><span class="ci">🐾</span>Животные</button>
-            <button type="button" class="cat-btn" onclick="selectCat('Вещи',this)"><span class="ci">🎒</span>Вещи</button>
-            <button type="button" class="cat-btn" onclick="selectCat('Другое',this)"><span class="ci">📮</span>Другое</button>
-        </div>
-        <select id="what" name="what" required tabindex="-1" aria-hidden="true">
-            <option value=""></option>
-            <option value="Посылка">Посылка</option>
-            <option value="Документы">Документы</option>
-            <option value="Животные">Животные</option>
-            <option value="Вещи">Вещи</option>
-            <option value="Другое">Другое</option>
-        </select>
-    </div>
-
-    <!-- Details -->
-    <div class="card">
-        <div class="card-header" style="padding-bottom:2px">Детали</div>
-
-        <div class="field-row">
-            <span class="field-icon">⚖️</span>
-            <div class="field-inner">
-                <div class="field-label">Вес / габариты</div>
-                <input type="text" id="weight" name="weight" placeholder="5 кг, 30×40 см...">
+            <div class="form-group">
+                <label class="required"><span class="emoji-icon">📦</span>Что передать</label>
+                <select id="what" name="what" required>
+                    <option value="">Выберите категорию</option>
+                    <option value="Посылка">📦 Посылка</option>
+                    <option value="Документы">📄 Документы</option>
+                    <option value="Животные">🐾 Животные</option>
+                    <option value="Вещи">🎒 Вещи</option>
+                    <option value="Другое">📮 Другое</option>
+                </select>
             </div>
-        </div>
 
-        <div class="field-row" style="align-items:flex-start; padding-top:8px; padding-bottom:8px;">
-            <span class="field-icon" style="margin-top:2px">💬</span>
-            <div class="field-inner">
-                <div class="field-label">Комментарий</div>
+            <div class="form-group">
+                <label><span class="emoji-icon">⚖️</span>Вес / габариты</label>
+                <input type="text" id="weight" name="weight" placeholder="Например: 5 кг, 30x40 см">
+                <div class="hint">Не обязательно</div>
+            </div>
+
+            <div class="form-group">
+                <label><span class="emoji-icon">💬</span>Комментарий</label>
                 <textarea id="comment" name="comment" placeholder="Дополнительная информация..."></textarea>
+                <div class="hint">Не обязательно</div>
             </div>
-        </div>
 
-        <div class="field-row">
-            <span class="field-icon">📱</span>
-            <div class="field-inner">
-                <div class="field-label">Контакт</div>
-                <input type="text" id="contact" name="contact" placeholder="Telegram @username или телефон">
+            <div class="form-group">
+                <label><span class="emoji-icon">📱</span>Контакт</label>
+                <input type="text" id="contact" name="contact" placeholder="Telegram @username, WhatsApp, телефон...">
+                <div class="hint">Telegram или телефон (опционально)</div>
             </div>
-        </div>
+
+            <div class="form-group">
+                <label><span class="emoji-icon">📷</span>Фото</label>
+                <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
+                    <div class="photo-upload-icon">📸</div>
+                    <div class="photo-upload-text">Нажмите для загрузки фото</div>
+                    <div class="hint" style="margin-top: 8px;">Заявки с фото проходят модерацию</div>
+                    <input type="file" id="photoInput" name="photos" accept="image/*" multiple>
+                </div>
+                <div id="photoPreview" class="photo-preview"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Отправить заявку</button>
+        </form>
     </div>
 
-    <!-- Photo -->
-    <div class="card">
-        <div class="card-header">Фото</div>
-        <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
-            <div class="photo-upload-icon">📸</div>
-            <div class="photo-upload-text">Прикрепить фото</div>
-            <div class="photo-upload-hint">Заявки с фото проходят ручную модерацию</div>
-            <input type="file" id="photoInput" name="photos" accept="image/*" multiple>
-        </div>
-        <div id="photoPreview" class="photo-preview"></div>
+    <div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
+
+    <div id="toast" class="toast">
+        <div class="toast-icon" id="toastIcon"></div>
+        <div class="toast-message" id="toastMessage"></div>
+        <button class="toast-close" onclick="closeToast()">Закрыть</button>
     </div>
 
-    <!-- Submit -->
-    <div class="submit-wrap">
-        <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">Отправить заявку</button>
-    </div>
+    <script>
+        vkBridge.send('VKWebAppInit');
 
-</div>
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : 'https://organizations-builds-nicole-nokia.trycloudflare.com';
+        
+        console.log('API URL:', API_URL);
+        
+        let vkUserId = null;
+        let citySearchTimeout = null;
+        let activeDropdown = null;
 
-<!-- VK Block -->
-<div id="vkBlockOverlay" class="overlay">
-    <div class="overlay-box">
-        <div class="ov-icon">🔒</div>
-        <div class="ov-title">Доступ ограничен</div>
-        <div class="ov-text">Откройте приложение через ВКонтакте для отправки заявок</div>
-    </div>
-</div>
-
-<!-- Admin Login -->
-<div id="adminPasswordOverlay" class="overlay">
-    <div class="overlay-box">
-        <div class="ov-icon">🔑</div>
-        <div class="ov-title">Администратор</div>
-        <div class="ov-text">Введите ключ доступа</div>
-        <input id="adminKeyInput" type="password" class="ov-input" placeholder="Ключ доступа"
-               onkeydown="if(event.key==='Enter')submitAdminKey()">
-        <div id="adminKeyError" class="ov-error">Неверный ключ. Попробуйте ещё раз.</div>
-        <button class="ov-btn" onclick="submitAdminKey()">Войти</button>
-    </div>
-</div>
-
-<!-- Toast -->
-<div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
-<div id="toast" class="toast">
-    <div class="toast-icon" id="toastIcon"></div>
-    <div class="toast-message" id="toastMessage"></div>
-    <button class="toast-close" onclick="closeToast()">Закрыть</button>
-</div>
-
-<script>
-    vkBridge.send('VKWebAppInit');
-
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:8000'
-        : 'https://45-144-232-122.nip.io';
-    const NGROK_H = { 'ngrok-skip-browser-warning': '1' };
-
-    // ── Access control ──
-    const urlParams = new URLSearchParams(window.location.search);
-    const isFromVK = urlParams.has('vk_user_id');
-    const isLocal  = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const hasAdminHash = window.location.hash === '#admin';
-    let isAdmin = sessionStorage.getItem('admin_key') !== null;
-
-    if (!isFromVK && !isLocal) {
-        if (isAdmin) { /* already in */ }
-        else if (hasAdminHash) {
-            document.getElementById('adminPasswordOverlay').style.display = 'flex';
-            setTimeout(() => document.getElementById('adminKeyInput').focus(), 100);
-        } else {
-            document.getElementById('vkBlockOverlay').style.display = 'flex';
-        }
-    }
-
-    async function submitAdminKey() {
-        const key = document.getElementById('adminKeyInput').value.trim();
-        if (!key) return;
-        const fd = new FormData();
-        fd.append('admin_key', key);
-        try {
-            const r = await fetch(`${API_URL}/api/admin/verify`, { method: 'POST', body: fd, headers: NGROK_H });
-            if (r.ok) {
-                sessionStorage.setItem('admin_key', key);
-                isAdmin = true;
-                document.getElementById('adminPasswordOverlay').style.display = 'none';
-            } else {
-                document.getElementById('adminKeyError').style.display = 'block';
-                document.getElementById('adminKeyInput').value = '';
-                document.getElementById('adminKeyInput').focus();
-            }
-        } catch {
-            document.getElementById('adminKeyError').textContent = 'Ошибка соединения';
-            document.getElementById('adminKeyError').style.display = 'block';
-        }
-    }
-
-    // ── VK User ──
-    let vkUserId = null;
-    vkBridge.send('VKWebAppGetUserInfo').then(d => { vkUserId = d.id; }).catch(() => {});
-
-    // ── Type ──
-    let selectedType = '';
-    function selectType(v) {
-        selectedType = v;
-        document.getElementById('typeBtnSend').classList.toggle('active', v === 'Могу передать');
-        document.getElementById('typeBtnNeed').classList.toggle('active', v === 'Нужно передать');
-    }
-
-    // ── Category ──
-    let selectedCat = '';
-    function selectCat(v, el) {
-        selectedCat = v;
-        document.getElementById('what').value = v;
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    // ── City autocomplete (local, no network) ──
-    const CITIES = ["Абаза", "Абакан", "Абдулино", "Абинск", "Агидель", "Агрыз", "Адыгейск", "Азнакаево", "Азов", "Ак-Довурак", "Аксай", "Алагир", "Алапаевск", "Алатырь", "Алдан", "Алейск", "Александров", "Александровск", "Александровск-Сахалинский", "Алексеевка", "Алексин", "Алзамай", "Алупка", "Алушта", "Альметьевск", "Амурск", "Анадырь", "Анапа", "Ангарск", "Андреаполь", "Анжеро-Судженск", "Анива", "Апатиты", "Апрелевка", "Апшеронск", "Арамиль", "Аргун", "Ардатов", "Ардон", "Арзамас", "Аркадак", "Армавир", "Армянск", "Арсеньев", "Арск", "Артём", "Артёмовск", "Артёмовский", "Архангельск", "Асбест", "Асино", "Астрахань", "Аткарск", "Ахтубинск", "Ачинск", "Ачхой-Мартан", "Аша", "Бабаево", "Бабушкин", "Бавлы", "Багратионовск", "Байкальск", "Баймак", "Бакал", "Баксан", "Балабаново", "Балаклава", "Балаково", "Балахна", "Балашиха", "Балашов", "Балей", "Балтийск", "Барабинск", "Барнаул", "Барыш", "Батайск", "Бахчисарай", "Бежецк", "Белая Калитва", "Белая Холуница", "Белгород", "Белебей", "Белинский", "Белово", "Белогорск", "Белозерск", "Белокуриха", "Беломорск", "Белоозёрский", "Белорецк", "Белореченск", "Белоусово", "Белоярский", "Белый", "Белёв", "Бердск", "Березники", "Берёзовский", "Беслан", "Бийск", "Бикин", "Билибино", "Биробиджан", "Бирск", "Бирюсинск", "Бирюч", "Благовещенск", "Благодарный", "Бобров", "Богданович", "Богородицк", "Богородск", "Боготол", "Богучар", "Бодайбо", "Бокситогорск", "Болгар", "Бологое", "Болотное", "Болохово", "Болхов", "Большой Камень", "Бор", "Борзя", "Борисоглебск", "Боровичи", "Боровск", "Бородино", "Братск", "Бронницы", "Брянск", "Бугульма", "Бугуруслан", "Будённовск", "Бузулук", "Буинск", "Буй", "Буйнакск", "Бутурлиновка", "Валдай", "Валуйки", "Велиж", "Великие Луки", "Великий Новгород", "Великий Устюг", "Вельск", "Венёв", "Верещагино", "Верея", "Верхнеуральск", "Верхний Тагил", "Верхний Уфалей", "Верхняя Пышма", "Верхняя Салда", "Верхняя Тура", "Верхотурье", "Верхоянск", "Весьегонск", "Ветлуга", "Видное", "Вилюйск", "Вилючинск", "Вихоревка", "Вичуга", "Владивосток", "Владикавказ", "Владимир", "Волгоград", "Волгодонск", "Волгореченск", "Волжск", "Волжский", "Вологда", "Володарск", "Волоколамск", "Волосово", "Волхов", "Волчанск", "Вольск", "Воркута", "Воронеж", "Ворсма", "Воскресенск", "Воткинск", "Всеволожск", "Вуктыл", "Выборг", "Выкса", "Высоковск", "Высоцк", "Вытегра", "Вышний Волочёк", "Вяземский", "Вязники", "Вязьма", "Вятские Поляны", "Гаврилов Посад", "Гаврилов-Ям", "Гагарин", "Гаджиево", "Гай", "Галич", "Гатчина", "Гвардейск", "Гдов", "Геленджик", "Георгиевск", "Глазов", "Голицыно", "Горбатов", "Горно-Алтайск", "Горнозаводск", "Горняк", "Городец", "Городище", "Городовиковск", "Гороховец", "Горячий Ключ", "Грайворон", "Гремячинск", "Грозный", "Грязи", "Грязовец", "Губаха", "Губкин", "Губкинский", "Гудермес", "Гуково", "Гулькевичи", "Гурьевск", "Гусев", "Гусиноозёрск", "Гусь-Хрустальный", "Давлеканово", "Дагестанские Огни", "Далматово", "Дальнегорск", "Дальнереченск", "Данилов", "Данков", "Дегтярск", "Дедовск", "Демидов", "Дербент", "Десногорск", "Джанкой", "Дзержинск", "Дзержинский", "Дивногорск", "Дигора", "Димитровград", "Дмитриев", "Дмитров", "Дмитровск", "Дно", "Добрянка", "Долгопрудный", "Долинск", "Домодедово", "Донецк", "Донской", "Дорогобуж", "Дрезна", "Дубна", "Дубовка", "Дудинка", "Духовщина", "Дюртюли", "Дятьково", "Евпатория", "Егорьевск", "Ейск", "Екатеринбург", "Елабуга", "Елец", "Елизово", "Ельня", "Еманжелинск", "Емва", "Енисейск", "Ермолино", "Ершов", "Ессентуки", "Ефремов", "Железноводск", "Железногорск", "Железногорск-Илимский", "Жердевка", "Жигулёвск", "Жиздра", "Жирновск", "Жуков", "Жуковка", "Жуковский", "Завитинск", "Заводоуковск", "Заволжск", "Заволжье", "Задонск", "Заинск", "Закаменск", "Заозёрный", "Заозёрск", "Западная Двина", "Заполярный", "Зарайск", "Заречный", "Заринск", "Звенигово", "Звенигород", "Зверево", "Зеленогорск", "Зеленоград", "Зеленоградск", "Зеленодольск", "Зеленокумск", "Зерноград", "Зея", "Зима", "Златоуст", "Злынка", "Змеиногорск", "Знаменск", "Зубцов", "Зуевка", "Ивангород", "Иваново", "Ивантеевка", "Ивдель", "Игарка", "Ижевск", "Избербаш", "Изобильный", "Иланский", "Инза", "Инкерман", "Иннополис", "Инсар", "Инта", "Ипатово", "Ирбит", "Иркутск", "Исилькуль", "Искитим", "Истра", "Ишим", "Ишимбай", "Йошкар-Ола", "Кадников", "Казань", "Калач", "Калач-на-Дону", "Калачинск", "Калининград", "Калининск", "Калтан", "Калуга", "Калязин", "Камбарка", "Каменка", "Каменногорск", "Каменск-Уральский", "Каменск-Шахтинский", "Камень-на-Оби", "Камешково", "Камызяк", "Камышин", "Камышлов", "Канаш", "Кандалакша", "Канск", "Карабаново", "Карабаш", "Карабулак", "Карасук", "Карачаевск", "Карачев", "Каргат", "Каргополь", "Карпинск", "Карталы", "Касимов", "Касли", "Каспийск", "Катав-Ивановск", "Катайск", "Качканар", "Кашин", "Кашира", "Кедровый", "Кемерово", "Кемь", "Керчь", "Кизел", "Кизилюрт", "Кизляр", "Кимовск", "Кимры", "Кингисепп", "Кинель", "Кинешма", "Киреевск", "Киренск", "Киржач", "Кириллов", "Кириши", "Киров", "Кировград", "Кирово-Чепецк", "Кировск", "Кирс", "Кирсанов", "Киселёвск", "Кисловодск", "Клин", "Клинцы", "Княгинино", "Ковдор", "Ковров", "Ковылкино", "Когалым", "Кодинск", "Козельск", "Козловка", "Козьмодемьянск", "Кола", "Кологрив", "Коломна", "Колпашево", "Колпино", "Колтуши", "Кольчугино", "Коммунар", "Комсомольск", "Комсомольск-на-Амуре", "Конаково", "Кондопога", "Кондрово", "Константиновск", "Копейск", "Кораблино", "Кореновск", "Коркино", "Королёв", "Короча", "Корсаков", "Коряжма", "Костерёво", "Костомукша", "Кострома", "Котельники", "Котельниково", "Котельнич", "Котлас", "Котово", "Котовск", "Кохма", "Красавино", "Красноармейск", "Красновишерск", "Красногорск", "Краснодар", "Красное Село", "Краснозаводск", "Краснознаменск", "Краснокаменск", "Краснокамск", "Красноперекопск", "Краснослободск", "Краснотурьинск", "Красноуральск", "Красноуфимск", "Красноярск", "Красный Кут", "Красный Сулин", "Красный Холм", "Кремёнки", "Кронштадт", "Кропоткин", "Крымск", "Кстово", "Кубинка", "Кувандык", "Кувшиново", "Кудрово", "Кудымкар", "Кузнецк", "Куйбышев", "Кукмор", "Кулебаки", "Кумертау", "Кунгур", "Купино", "Курган", "Курганинск", "Курильск", "Курлово", "Куровское", "Курск", "Куртамыш", "Курчалой", "Курчатов", "Куса", "Кушва", "Кызыл", "Кыштым", "Кяхта", "Лабинск", "Лабытнанги", "Лагань", "Ладушкин", "Лаишево", "Лакинск", "Лангепас", "Лахденпохья", "Лебедянь", "Лениногорск", "Ленинск", "Ленинск-Кузнецкий", "Ленск", "Лермонтов", "Лесной", "Лесозаводск", "Лесосибирск", "Ливны", "Ликино-Дулёво", "Липецк", "Липки", "Лиски", "Лихославль", "Лобня", "Лодейное Поле", "Ломоносов", "Лосино-Петровский", "Луга", "Луза", "Лукоянов", "Луховицы", "Лысково", "Лысьва", "Лыткарино", "Льгов", "Любань", "Люберцы", "Любим", "Людиново", "Лянтор", "Магадан", "Магас", "Магнитогорск", "Майкоп", "Майский", "Макаров", "Макарьев", "Макушино", "Малая Вишера", "Малгобек", "Малмыж", "Малоархангельск", "Малоярославец", "Мамадыш", "Мамоново", "Мантурово", "Мариинск", "Мариинский Посад", "Маркс", "Махачкала", "Мглин", "Мегион", "Медвежьегорск", "Медногорск", "Медынь", "Межгорье", "Междуреченск", "Мезень", "Меленки", "Мелеуз", "Менделеевск", "Мензелинск", "Мещовск", "Миасс", "Микунь", "Миллерово", "Минеральные Воды", "Минусинск", "Миньяр", "Мирный", "Михайлов", "Михайловка", "Михайловск", "Мичуринск", "Могоча", "Можайск", "Можга", "Моздок", "Мончегорск", "Морозовск", "Моршанск", "Мосальск", "Москва", "Московский", "Муравленко", "Мураши", "Мурино", "Мурманск", "Муром", "Мценск", "Мыски", "Мытищи", "Мышкин", "Набережные Челны", "Навашино", "Наволоки", "Надым", "Назарово", "Назрань", "Называевск", "Нальчик", "Нариманов", "Наро-Фоминск", "Нарткала", "Нарьян-Мар", "Находка", "Невель", "Невельск", "Невинномысск", "Невьянск", "Нелидово", "Неман", "Нерехта", "Нерчинск", "Нерюнгри", "Нестеров", "Нефтегорск", "Нефтекамск", "Нефтекумск", "Нефтеюганск", "Нея", "Нижневартовск", "Нижнекамск", "Нижнеудинск", "Нижние Серги", "Нижний Ломов", "Нижний Новгород", "Нижний Тагил", "Нижняя Салда", "Нижняя Тура", "Николаевск", "Николаевск-на-Амуре", "Никольск", "Никольское", "Новая Ладога", "Новая Ляля", "Новоалександровск", "Новоалтайск", "Новоаннинский", "Нововоронеж", "Новодвинск", "Новозыбков", "Новокубанск", "Новокузнецк", "Новокуйбышевск", "Новомичуринск", "Новомосковск", "Новопавловск", "Новоржев", "Новороссийск", "Новосибирск", "Новосиль", "Новосокольники", "Новотроицк", "Новоузенск", "Новоульяновск", "Новоуральск", "Новохопёрск", "Новочебоксарск", "Новочеркасск", "Новошахтинск", "Новый Оскол", "Новый Уренгой", "Ногинск", "Нолинск", "Норильск", "Ноябрьск", "Нурлат", "Нытва", "Нюрба", "Нягань", "Нязепетровск", "Няндома", "Облучье", "Обнинск", "Обоянь", "Обь", "Одинцово", "Озёрск", "Озёры", "Октябрьск", "Октябрьский", "Окуловка", "Оленегорск", "Олонец", "Олёкминск", "Омск", "Омутнинск", "Онега", "Опочка", "Оренбург", "Орехово-Зуево", "Орлов", "Орск", "Орёл", "Оса", "Осинники", "Осташков", "Остров", "Островной", "Острогожск", "Отрадное", "Отрадный", "Оха", "Оханск", "Очёр", "Павлово", "Павловск", "Павловский Посад", "Палласовка", "Партизанск", "Певек", "Пенза", "Первомайск", "Первоуральск", "Перевоз", "Пересвет", "Переславль-Залесский", "Пермь", "Пестово", "Петергоф", "Петров Вал", "Петровск", "Петровск-Забайкальский", "Петрозаводск", "Петропавловск-Камчатский", "Петухово", "Петушки", "Печора", "Печоры", "Пикалёво", "Пионерский", "Питкяранта", "Плавск", "Пласт", "Плёс", "Поворино", "Подольск", "Подпорожье", "Покачи", "Покров", "Покровск", "Полевской", "Полесск", "Полысаево", "Полярные Зори", "Полярный", "Поронайск", "Порхов", "Похвистнево", "Почеп", "Починок", "Пошехонье", "Правдинск", "Приволжск", "Приморск", "Приморско-Ахтарск", "Приозерск", "Прокопьевск", "Пролетарск", "Протвино", "Прохладный", "Псков", "Пугачёв", "Пудож", "Пустошка", "Пучеж", "Пушкин", "Пушкино", "Пущино", "Пыталово", "Пыть-Ях", "Пятигорск", "Радужный", "Райчихинск", "Раменское", "Рассказово", "Ревда", "Реж", "Реутов", "Ржев", "Родники", "Рославль", "Россошь", "Ростов", "Ростов-на-Дону", "Рошаль", "Ртищево", "Рубцовск", "Рудня", "Руза", "Рузаевка", "Рыбинск", "Рыбное", "Рыльск", "Ряжск", "Рязань", "Саки", "Салават", "Салаир", "Салехард", "Сальск", "Самара", "Санкт-Петербург", "Саранск", "Сарапул", "Саратов", "Саров", "Сасово", "Сатка", "Сафоново", "Саяногорск", "Саянск", "Светлогорск", "Светлоград", "Светлый", "Светогорск", "Свирск", "Свободный", "Себеж", "Севастополь", "Северо-Курильск", "Северобайкальск", "Северодвинск", "Североморск", "Североуральск", "Северск", "Севск", "Сегежа", "Сельцо", "Семикаракорск", "Семилуки", "Семёнов", "Сенгилей", "Серафимович", "Сергач", "Сергиев Посад", "Сердобск", "Серов", "Серпухов", "Сертолово", "Сестрорецк", "Сибай", "Сим", "Симферополь", "Сковородино", "Скопин", "Славгород", "Славск", "Славянск-на-Кубани", "Сланцы", "Слободской", "Слюдянка", "Смоленск", "Снежинск", "Снежногорск", "Собинка", "Советск", "Советская Гавань", "Советский", "Сокол", "Солигалич", "Соликамск", "Солнечногорск", "Соль-Илецк", "Сольвычегодск", "Сольцы", "Сорочинск", "Сорск", "Сортавала", "Сосенский", "Сосновка", "Сосновоборск", "Сосновый Бор", "Сосногорск", "Сочи", "Спас-Деменск", "Спас-Клепики", "Спасск", "Спасск-Дальний", "Спасск-Рязанский", "Среднеколымск", "Среднеуральск", "Сретенск", "Ставрополь", "Старая Купавна", "Старая Русса", "Старица", "Стародуб", "Старый Крым", "Старый Оскол", "Стерлитамак", "Стрежевой", "Строитель", "Струнино", "Ступино", "Суворов", "Судак", "Суджа", "Судогда", "Суздаль", "Сунжа", "Суоярви", "Сураж", "Сургут", "Суровикино", "Сурск", "Сусуман", "Сухиничи", "Сухой Лог", "Сызрань", "Сыктывкар", "Сысерть", "Сычёвка", "Сясьстрой", "Тавда", "Таганрог", "Тайга", "Тайшет", "Талдом", "Талица", "Тамбов", "Тара", "Тарко-Сале", "Таруса", "Татарск", "Таштагол", "Тверь", "Теберда", "Тейково", "Темников", "Темрюк", "Терек", "Тетюши", "Тимашёвск", "Тихвин", "Тихорецк", "Тобольск", "Тогучин", "Тольятти", "Томари", "Томмот", "Томск", "Топки", "Торжок", "Торопец", "Тосно", "Тотьма", "Троицк", "Трубчевск", "Трёхгорный", "Туапсе", "Туймазы", "Тула", "Тулун", "Туран", "Туринск", "Тутаев", "Тында", "Тырныауз", "Тюкалинск", "Тюмень", "Уварово", "Углегорск", "Углич", "Удачный", "Удомля", "Ужур", "Узловая", "Улан-Удэ", "Ульяновск", "Унеча", "Урай", "Урень", "Уржум", "Урус-Мартан", "Урюпинск", "Усинск", "Усмань", "Усолье", "Усолье-Сибирское", "Уссурийск", "Усть-Джегута", "Усть-Илимск", "Усть-Катав", "Усть-Кут", "Усть-Лабинск", "Устюжна", "Уфа", "Ухта", "Учалы", "Уяр", "Фатеж", "Феодосия", "Фокино", "Фролово", "Фрязино", "Фурманов", "Хабаровск", "Хадыженск", "Ханты-Мансийск", "Харабали", "Харовск", "Хасавюрт", "Хвалынск", "Хилок", "Химки", "Холм", "Холмск", "Хотьково", "Цивильск", "Цимлянск", "Циолковский", "Чадан", "Чайковский", "Чапаевск", "Чаплыгин", "Чебаркуль", "Чебоксары", "Чегем", "Чекалин", "Челябинск", "Чердынь", "Черемхово", "Черепаново", "Череповец", "Черкесск", "Черноголовка", "Черногорск", "Чернушка", "Черняховск", "Чехов", "Чистополь", "Чита", "Чкаловск", "Чудово", "Чулым", "Чусовой", "Чухлома", "Чёрмоз", "Шагонар", "Шадринск", "Шали", "Шарыпово", "Шарья", "Шатура", "Шахты", "Шахунья", "Шацк", "Шебекино", "Шелехов", "Шенкурск", "Шилка", "Шимановск", "Шиханы", "Шлиссельбург", "Шумерля", "Шумиха", "Шуя", "Щербинка", "Щигры", "Щучье", "Щёкино", "Щёлкино", "Щёлково", "Электрогорск", "Электросталь", "Электроугли", "Элиста", "Энгельс", "Эртиль", "Югорск", "Южа", "Южно-Сахалинск", "Южно-Сухокумск", "Южноуральск", "Юрга", "Юрьев-Польский", "Юрьевец", "Юрюзань", "Юхнов", "Ядрин", "Якутск", "Ялта", "Ялуторовск", "Янаул", "Яранск", "Яровое", "Ярославль", "Ярцево", "Ясногорск", "Ясный", "Яхрома"];
-
-    let activeDD = null;
-
-    const normalize = s => s.toLowerCase().replace(/ё/g, 'е');
-
-    function highlight(city, query) {
-        const idx = normalize(city).indexOf(normalize(query));
-        if (idx === -1) return document.createTextNode(city);
-        const span = document.createElement('span');
-        span.appendChild(document.createTextNode(city.slice(0, idx)));
-        const mark = document.createElement('mark');
-        mark.textContent = city.slice(idx, idx + query.length);
-        span.appendChild(mark);
-        span.appendChild(document.createTextNode(city.slice(idx + query.length)));
-        return span;
-    }
-
-    function setupCity(inputId, dropId) {
-        const input = document.getElementById(inputId);
-        const drop  = document.getElementById(dropId);
-
-        input.addEventListener('input', function() {
-            const v = this.value.trim();
-            drop.innerHTML = '';
-            if (v.length < 2) { drop.classList.remove('show'); activeDD = null; return; }
-
-            const norm = normalize(v);
-            const results = CITIES.filter(c => normalize(c).includes(norm)).slice(0, 30);
-
-            if (!results.length) {
-                drop.innerHTML = '<div class="city-loading">Ничего не найдено</div>';
-                drop.classList.add('show'); activeDD = drop;
-                return;
-            }
-
-            results.forEach(city => {
-                const el = document.createElement('div');
-                el.className = 'city-item';
-                el.appendChild(highlight(city, v));
-                const pick = e => { e && (e.preventDefault(), e.stopPropagation()); input.value = city; drop.classList.remove('show'); drop.innerHTML = ''; activeDD = null; };
-                el.addEventListener('pointerdown', pick);
-                el.addEventListener('click', pick);
-                drop.appendChild(el);
+        vkBridge.send('VKWebAppGetUserInfo')
+            .then(data => {
+                vkUserId = data.id;
+                console.log('VK User ID получен:', vkUserId);
+            })
+            .catch(error => {
+                console.log('VK User ID error:', error);
             });
-            drop.classList.add('show'); activeDD = drop;
-        });
 
-        input.addEventListener('blur', () => setTimeout(() => { if (activeDD === drop) { drop.classList.remove('show'); activeDD = null; } }, 280));
-        input.addEventListener('focus', () => { if (input.value.length >= 2 && drop.children.length) { drop.classList.add('show'); activeDD = drop; } });
-    }
+        function setupCityAutocomplete(inputId, dropdownId) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
 
-    setupCity('fromCity', 'fromCityDropdown');
-    setupCity('toCity',   'toCityDropdown');
+            input.addEventListener('input', function(e) {
+                const value = this.value.trim();
+                
+                clearTimeout(citySearchTimeout);
+                dropdown.innerHTML = '';
 
-    // ── Photos ──
-    document.getElementById('photoInput').addEventListener('change', function() {
-        const preview = document.getElementById('photoPreview');
-        preview.innerHTML = '';
-        for (const file of this.files) {
-            const reader = new FileReader();
-            reader.onload = e => { const img = document.createElement('img'); img.src = e.target.result; preview.appendChild(img); };
-            reader.readAsDataURL(file);
+                if (value.length < 2) {
+                    dropdown.classList.remove('show');
+                    activeDropdown = null;
+                    return;
+                }
+
+                dropdown.innerHTML = '<div class="city-loading">Поиск...</div>';
+                dropdown.classList.add('show');
+                activeDropdown = dropdown;
+
+                citySearchTimeout = setTimeout(async () => {
+                    try {
+                        console.log('Поиск городов:', value);
+                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Города получены:', data.cities?.length || 0);
+                        
+                        dropdown.innerHTML = '';
+
+                        if (data.cities && data.cities.length > 0) {
+                            data.cities.forEach(city => {
+                                const item = document.createElement('div');
+                                item.className = 'city-item';
+                                item.textContent = city;
+                                
+                                item.addEventListener('mousedown', function(e) {
+                                    e.preventDefault();
+                                    input.value = city;
+                                    dropdown.classList.remove('show');
+                                    activeDropdown = null;
+                                });
+                                
+                                item.addEventListener('touchstart', function(e) {
+                                    e.preventDefault();
+                                    input.value = city;
+                                    dropdown.classList.remove('show');
+                                    activeDropdown = null;
+                                }, { passive: false });
+                                
+                                dropdown.appendChild(item);
+                            });
+                            dropdown.classList.add('show');
+                            activeDropdown = dropdown;
+                        } else {
+                            dropdown.innerHTML = '<div class="city-loading">Города не найдены</div>';
+                        }
+                    } catch (error) {
+                        console.error('City search error:', error);
+                        dropdown.innerHTML = '<div class="city-loading">Ошибка поиска. Попробуйте ещё раз.</div>';
+                    }
+                }, 400);
+            });
+
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (activeDropdown === dropdown) {
+                        dropdown.classList.remove('show');
+                        activeDropdown = null;
+                    }
+                }, 300);
+            });
+
+            input.addEventListener('focus', function() {
+                if (this.value.length >= 2 && dropdown.children.length > 0) {
+                    dropdown.classList.add('show');
+                    activeDropdown = dropdown;
+                }
+            });
         }
-    });
 
-    // ── Toast ──
-    function showToast(msg, type) {
-        const t = document.getElementById('toast');
-        const icons = { success: '✅', error: '❌', warning: '⏳' };
-        t.className = 'toast ' + type;
-        document.getElementById('toastIcon').textContent = icons[type] || '📮';
-        document.getElementById('toastMessage').textContent = msg;
-        document.getElementById('toastOverlay').classList.add('show');
-        t.classList.add('show');
-    }
+        setupCityAutocomplete('fromCity', 'fromCityDropdown');
+        setupCityAutocomplete('toCity', 'toCityDropdown');
 
-    function closeToast() {
-        document.getElementById('toast').classList.remove('show');
-        document.getElementById('toastOverlay').classList.remove('show');
-    }
+        const photoPreview = document.getElementById('photoPreview');
+        const photoInput = document.getElementById('photoInput');
 
-    // ── Submit ──
-    async function handleSubmit() {
-        if (!selectedType)  { showToast('Выберите тип заявки', 'error'); return; }
-        const from = document.getElementById('fromCity').value.trim();
-        const to   = document.getElementById('toCity').value.trim();
-        if (!from) { showToast('Укажите город отправления', 'error'); return; }
-        if (!to)   { showToast('Укажите город назначения', 'error'); return; }
-        if (!selectedCat) { showToast('Выберите категорию груза', 'error'); return; }
-
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true; btn.textContent = 'Отправка...';
-
-        const fd = new FormData();
-        fd.append('type', selectedType);
-        fd.append('from_city', from);
-        fd.append('to_city', to);
-        fd.append('what', selectedCat);
-
-        const date    = document.getElementById('date').value;
-        const weight  = document.getElementById('weight').value.trim();
-        const comment = document.getElementById('comment').value.trim();
-        const contact = document.getElementById('contact').value.trim();
-        if (date)    fd.append('date', date);
-        if (weight)  fd.append('weight', weight);
-        if (comment) fd.append('comment', comment);
-        if (contact) fd.append('contact', contact);
-
-        if (vkUserId) fd.append('vk_user_id', vkUserId);
-        if (isAdmin)  fd.append('admin_key', sessionStorage.getItem('admin_key'));
-        else          fd.append('vk_launch_params', window.location.search);
-
-        for (const p of document.getElementById('photoInput').files) fd.append('photos', p);
-
-        try {
-            const ctrl = new AbortController();
-            const t = setTimeout(() => ctrl.abort(), 15000);
-            const res = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd, headers: NGROK_H, signal: ctrl.signal });
-            clearTimeout(t);
-            if (!res.ok) {
-                const txt = await res.text().catch(() => '');
-                throw new Error(`HTTP ${res.status}${txt ? ': ' + txt : ''}`);
+        photoInput.addEventListener('change', function(e) {
+            photoPreview.innerHTML = '';
+            const files = e.target.files;
+            
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    photoPreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
             }
-            const result = await res.json();
-
-            if (result.status === 'published')     { showToast('Заявка опубликована!', 'success'); resetForm(); }
-            else if (result.status === 'manual')   { showToast('Заявка отправлена на модерацию', 'warning'); resetForm(); }
-            else if (result.status === 'rejected') { showToast(result.message || 'Заявка отклонена', 'error'); }
-            else                                   { showToast(result.message || 'Неизвестный статус', 'error'); }
-        } catch (e) {
-            console.error(e);
-            const msg = e.name === 'AbortError' ? 'Сервер не отвечает — попробуйте ещё раз' : 'Ошибка отправки: ' + e.message;
-            showToast(msg, 'error');
-        } finally {
-            btn.disabled = false; btn.textContent = 'Отправить заявку';
-        }
-    }
-
-    // ── Keyboard avoidance ──
-    if (window.visualViewport) {
-        const BASE_PB = 20;
-        window.visualViewport.addEventListener('resize', () => {
-            const kb = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
-            document.body.style.paddingBottom = (kb > 60 ? kb + BASE_PB : BASE_PB) + 'px';
         });
-    }
 
-    function resetForm() {
-        selectedType = ''; selectedCat = '';
-        ['typeBtnSend','typeBtnNeed'].forEach(id => document.getElementById(id).classList.remove('active'));
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        ['fromCity','toCity','date','weight','comment','contact'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('what').value = '';
-        document.getElementById('photoInput').value = '';
-        document.getElementById('photoPreview').innerHTML = '';
-    }
-</script>
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const toastOverlay = document.getElementById('toastOverlay');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = 'toast';
+            toast.classList.add(type);
+            
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⏳'
+            };
+            
+            toastIcon.textContent = icons[type] || '📮';
+            toastMessage.textContent = message;
+            
+            toastOverlay.classList.add('show');
+            toast.classList.add('show');
+        }
+
+        function closeToast() {
+            document.getElementById('toast').classList.remove('show');
+            document.getElementById('toastOverlay').classList.remove('show');
+        }
+
+        document.getElementById('submissionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+
+            const formData = new FormData(this);
+            
+            if (vkUserId) {
+                formData.append('vk_user_id', vkUserId);
+            }
+
+            try {
+                console.log('Отправка формы...');
+                const response = await fetch(`${API_URL}/api/submit`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Result:', result);
+
+                if (result.status === 'published') {
+                    showToast('Заявка успешно опубликована!', 'success');
+                    document.getElementById('submissionForm').reset();
+                    photoPreview.innerHTML = '';
+                } else if (result.status === 'manual') {
+                    showToast('Ваша заявка отправлена на модерацию', 'warning');
+                    document.getElementById('submissionForm').reset();
+                    photoPreview.innerHTML = '';
+                } else if (result.status === 'rejected') {
+                    showToast(result.message || 'Заявка отклонена', 'error');
+                } else {
+                    showToast(result.message || 'Неизвестный статус', 'error');
+                }
+
+            } catch (error) {
+                console.error('Submit error:', error);
+                showToast('Ошибка отправки. Проверьте подключение к интернету.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить заявку';
+            }
+        });
+    </script>
 </body>
 </html>
