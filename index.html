@@ -2,45 +2,37 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Заявка на доставку</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Передам Посылку</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            height: 100%;
-            overflow-y: scroll;
-            -webkit-overflow-scrolling: touch;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
         }
 
         .container {
             max-width: 500px;
             width: 100%;
-            margin: 0 auto;
             background: white;
             border-radius: 24px;
             padding: 32px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin-bottom: 40px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #1a1a1a;
             text-align: center;
         }
@@ -49,17 +41,17 @@
             text-align: center;
             color: #666;
             font-size: 14px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             position: relative;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
             font-weight: 600;
             color: #333;
             font-size: 13px;
@@ -67,48 +59,126 @@
             letter-spacing: 0.5px;
         }
 
-        .required::after {
-            content: " *";
-            color: #ff4757;
-        }
+        .required::after { content: " *"; color: #ff4757; }
 
         input, select, textarea {
             width: 100%;
-            padding: 14px 16px;
+            padding: 13px 15px;
             border: 2px solid #e1e8ed;
             border-radius: 12px;
             font-size: 15px;
             font-family: inherit;
             transition: all 0.3s ease;
             background: #f8f9fa;
+            color: #1a1a1a;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
         }
 
-        select {
+        select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23667eea' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
+
+        textarea { resize: vertical; min-height: 80px; }
+
+        .city-wrapper { position: relative; }
+
+        .city-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .city-dropdown.open { display: block; }
+
+        .city-option {
+            padding: 10px 15px;
             cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
+            font-size: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.15s;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 80px;
+        .city-option:hover, .city-option.selected { background: #f0f3ff; color: #667eea; font-weight: 500; }
+        .city-option:last-child { border-bottom: none; }
+
+        .photo-upload {
+            border: 2px dashed #d0d7de;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
         }
 
-        .hint {
+        .photo-upload:hover { border-color: #667eea; background: #f0f3ff; }
+
+        .photo-upload input { display: none; }
+
+        .photo-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .photo-icon { font-size: 32px; }
+
+        .photo-upload-text { color: #555; font-size: 14px; }
+        .photo-upload-hint { color: #999; font-size: 12px; }
+
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .photo-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e1e8ed;
+        }
+
+        .photo-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
             font-size: 12px;
-            color: #999;
-            margin-top: 6px;
-            font-style: italic;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .submit-btn {
@@ -121,279 +191,88 @@
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 24px;
+            transition: all 0.3s;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
         }
 
-        .submit-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .submit-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .photo-upload {
-            border: 2px dashed #e1e8ed;
-            border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .photo-upload:hover {
-            border-color: #667eea;
-            background: white;
-        }
-
-        .photo-upload-icon {
-            font-size: 48px;
-            margin-bottom: 8px;
-        }
-
-        .photo-upload-text {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .photo-upload input {
-            display: none;
-        }
-
-        .photo-preview {
-            margin-top: 12px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 8px;
-        }
-
-        .photo-preview img {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #e1e8ed;
-        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .submit-btn:active { transform: translateY(0); }
+        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
         .toast {
             position: fixed;
-            top: 50%;
+            top: 20px;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
+            transform: translateX(-50%) translateY(-100px);
             background: white;
-            padding: 32px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            z-index: 10000;
-            min-width: 320px;
-            max-width: 90%;
+            border-radius: 16px;
+            padding: 16px 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            max-width: 320px;
+            width: calc(100% - 40px);
             text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-weight: 600;
+            font-size: 15px;
         }
 
-        .toast.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { border-left: 4px solid #2ed573; color: #2ed573; }
+        .toast.error { border-left: 4px solid #ff4757; color: #ff4757; }
+        .toast.warning { border-left: 4px solid #ffa502; color: #ffa502; }
 
-        .toast.success {
-            border-top: 4px solid #2ecc71;
-        }
-
-        .toast.error {
-            border-top: 4px solid #e74c3c;
-        }
-
-        .toast.warning {
-            border-top: 4px solid #f39c12;
-        }
-
-        .toast-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            animation: bounceIn 0.6s;
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .toast-message {
-            font-size: 16px;
-            color: #333;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .toast-close {
-            padding: 12px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-        }
-
-        .toast-close:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .toast-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .toast-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .city-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            background: white;
-            border: 2px solid #667eea;
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            z-index: 100;
-            display: none;
-            margin-top: -2px;
-        }
-
-        .city-dropdown.show {
-            display: block;
-        }
-
-        .city-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .city-item:hover {
-            background: #f8f9fa;
-            padding-left: 20px;
-        }
-
-        .city-item:active {
-            background: #e8e9fa;
-        }
-
-        .city-item:last-child {
-            border-bottom: none;
-        }
-
-        .city-loading {
-            padding: 12px;
-            text-align: center;
+        .optional-tag {
+            font-size: 11px;
             color: #999;
-            font-size: 13px;
-        }
-
-        .emoji-icon {
-            font-size: 20px;
-            margin-right: 8px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-
-            .container {
-                padding: 24px;
-                border-radius: 20px;
-                margin-bottom: 60px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            input, select, textarea {
-                font-size: 16px;
-            }
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            margin-left: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✈️ Заявка на доставку</h1>
-        <p class="subtitle">Заполните форму ниже</p>
+        <h1>📦 Передам Посылку</h1>
+        <p class="subtitle">Бесплатная передача посылок попутчиками</p>
 
-        <form id="submissionForm" enctype="multipart/form-data">
+        <form id="submissionForm">
             <div class="form-group">
-                <label class="required"><span class="emoji-icon">📝</span>Тип заявки</label>
-                <select id="type" name="type" required>
-                    <option value="">Выберите тип</option>
+                <label class="required">Тип заявки</label>
+                <select name="type" id="type" required>
+                    <option value="">— Выберите тип —</option>
                     <option value="Могу передать">📦 Могу передать</option>
                     <option value="Нужно передать">🔍 Нужно передать</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="required"><span class="emoji-icon">📍</span>Откуда</label>
-                <input type="text" id="fromCity" name="from_city" placeholder="Начните вводить город..." required autocomplete="off">
-                <div class="city-dropdown" id="fromCityDropdown"></div>
+                <label class="required">Откуда</label>
+                <div class="city-wrapper">
+                    <input type="text" name="from_city" id="from_city" placeholder="Введите город отправления" autocomplete="off" required>
+                    <div class="city-dropdown" id="from_city_dropdown"></div>
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="required"><span class="emoji-icon">🎯</span>Куда</label>
-                <input type="text" id="toCity" name="to_city" placeholder="Начните вводить город..." required autocomplete="off">
-                <div class="city-dropdown" id="toCityDropdown"></div>
+                <label class="required">Куда</label>
+                <div class="city-wrapper">
+                    <input type="text" name="to_city" id="to_city" placeholder="Введите город назначения" autocomplete="off" required>
+                    <div class="city-dropdown" id="to_city_dropdown"></div>
+                </div>
             </div>
 
             <div class="form-group">
-                <label><span class="emoji-icon">📅</span>Дата</label>
-                <input type="date" id="date" name="date">
-                <div class="hint">Не обязательно</div>
+                <label>Дата <span class="optional-tag">(необязательно)</span></label>
+                <input type="date" name="date" id="date">
             </div>
 
             <div class="form-group">
-                <label class="required"><span class="emoji-icon">📦</span>Что передать</label>
-                <select id="what" name="what" required>
-                    <option value="">Выберите категорию</option>
+                <label class="required">Что передать</label>
+                <select name="what" id="what" required>
+                    <option value="">— Выберите категорию —</option>
                     <option value="Посылка">📦 Посылка</option>
                     <option value="Документы">📄 Документы</option>
                     <option value="Животные">🐾 Животные</option>
@@ -403,253 +282,198 @@
             </div>
 
             <div class="form-group">
-                <label><span class="emoji-icon">⚖️</span>Вес / габариты</label>
-                <input type="text" id="weight" name="weight" placeholder="Например: 5 кг, 30x40 см">
-                <div class="hint">Не обязательно</div>
+                <label>Вес / габариты <span class="optional-tag">(необязательно)</span></label>
+                <input type="text" name="weight" id="weight" placeholder="Например: 2 кг, небольшая коробка">
             </div>
 
             <div class="form-group">
-                <label><span class="emoji-icon">💬</span>Комментарий</label>
-                <textarea id="comment" name="comment" placeholder="Дополнительная информация..."></textarea>
-                <div class="hint">Не обязательно</div>
+                <label>Комментарий <span class="optional-tag">(необязательно)</span></label>
+                <textarea name="comment" id="comment" placeholder="Дополнительная информация..."></textarea>
             </div>
 
             <div class="form-group">
-                <label><span class="emoji-icon">📱</span>Контакт</label>
-                <input type="text" id="contact" name="contact" placeholder="Telegram @username, WhatsApp, телефон...">
-                <div class="hint">Telegram или телефон (опционально)</div>
+                <label>Контакт <span class="optional-tag">(необязательно)</span></label>
+                <input type="text" name="contact" id="contact" placeholder="Телефон, Telegram или ВК">
             </div>
 
             <div class="form-group">
-                <label><span class="emoji-icon">📷</span>Фото</label>
-                <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
-                    <div class="photo-upload-icon">📸</div>
-                    <div class="photo-upload-text">Нажмите для загрузки фото</div>
-                    <div class="hint" style="margin-top: 8px;">Заявки с фото проходят модерацию</div>
-                    <input type="file" id="photoInput" name="photos" accept="image/*" multiple>
+                <label>Фото <span class="optional-tag">(необязательно)</span></label>
+                <div class="photo-upload">
+                    <label class="photo-upload-label" for="photos">
+                        <span class="photo-icon">📷</span>
+                        <span class="photo-upload-text">Нажмите чтобы добавить фото</span>
+                        <span class="photo-upload-hint">JPG, PNG до 5 МБ · не обязательно</span>
+                    </label>
+                    <input type="file" id="photos" name="photos" accept="image/*" multiple>
                 </div>
-                <div id="photoPreview" class="photo-preview"></div>
+                <div class="photo-preview" id="photoPreview"></div>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">Отправить заявку</button>
         </form>
     </div>
 
-    <div id="toastOverlay" class="toast-overlay" onclick="closeToast()"></div>
-
-    <div id="toast" class="toast">
-        <div class="toast-icon" id="toastIcon"></div>
-        <div class="toast-message" id="toastMessage"></div>
-        <button class="toast-close" onclick="closeToast()">Закрыть</button>
-    </div>
+    <div class="toast" id="toast"></div>
 
     <script>
-        vkBridge.send('VKWebAppInit');
+        // ====== CONFIG ======
+        // ВАЖНО: замените на актуальный URL вашего backend/туннеля
+        const API_URL = 'https://organizations-builds-nicole-nokia.trycloudflare.com';
+        // ====================
 
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:8000'
-            : 'https://organizations-builds-nicole-nokia.trycloudflare.com';
-        
-        console.log('API URL:', API_URL);
-        
         let vkUserId = null;
-        let citySearchTimeout = null;
-        let activeDropdown = null;
 
-        vkBridge.send('VKWebAppGetUserInfo')
-            .then(data => {
+        // VK Bridge init
+        try {
+            vkBridge.send('VKWebAppInit');
+            vkBridge.send('VKWebAppGetUserInfo').then(data => {
                 vkUserId = data.id;
-                console.log('VK User ID получен:', vkUserId);
-            })
-            .catch(error => {
-                console.log('VK User ID error:', error);
-            });
+            }).catch(() => {});
+        } catch(e) {}
 
-        function setupCityAutocomplete(inputId, dropdownId) {
-            const input = document.getElementById(inputId);
-            const dropdown = document.getElementById(dropdownId);
-
-            input.addEventListener('input', function(e) {
-                const value = this.value.trim();
-                
-                clearTimeout(citySearchTimeout);
-                dropdown.innerHTML = '';
-
-                if (value.length < 2) {
-                    dropdown.classList.remove('show');
-                    activeDropdown = null;
-                    return;
-                }
-
-                dropdown.innerHTML = '<div class="city-loading">Поиск...</div>';
-                dropdown.classList.add('show');
-                activeDropdown = dropdown;
-
-                citySearchTimeout = setTimeout(async () => {
-                    try {
-                        console.log('Поиск городов:', value);
-                        const response = await fetch(`${API_URL}/api/cities?query=${encodeURIComponent(value)}`, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        
-                        const data = await response.json();
-                        console.log('Города получены:', data.cities?.length || 0);
-                        
-                        dropdown.innerHTML = '';
-
-                        if (data.cities && data.cities.length > 0) {
-                            data.cities.forEach(city => {
-                                const item = document.createElement('div');
-                                item.className = 'city-item';
-                                item.textContent = city;
-                                
-                                item.addEventListener('mousedown', function(e) {
-                                    e.preventDefault();
-                                    input.value = city;
-                                    dropdown.classList.remove('show');
-                                    activeDropdown = null;
-                                });
-                                
-                                item.addEventListener('touchstart', function(e) {
-                                    e.preventDefault();
-                                    input.value = city;
-                                    dropdown.classList.remove('show');
-                                    activeDropdown = null;
-                                }, { passive: false });
-                                
-                                dropdown.appendChild(item);
-                            });
-                            dropdown.classList.add('show');
-                            activeDropdown = dropdown;
-                        } else {
-                            dropdown.innerHTML = '<div class="city-loading">Города не найдены</div>';
-                        }
-                    } catch (error) {
-                        console.error('City search error:', error);
-                        dropdown.innerHTML = '<div class="city-loading">Ошибка поиска. Попробуйте ещё раз.</div>';
-                    }
-                }, 400);
-            });
-
-            input.addEventListener('blur', function() {
-                setTimeout(() => {
-                    if (activeDropdown === dropdown) {
-                        dropdown.classList.remove('show');
-                        activeDropdown = null;
-                    }
-                }, 300);
-            });
-
-            input.addEventListener('focus', function() {
-                if (this.value.length >= 2 && dropdown.children.length > 0) {
-                    dropdown.classList.add('show');
-                    activeDropdown = dropdown;
-                }
-            });
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            setTimeout(() => toast.classList.add('show'), 50);
+            setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        setupCityAutocomplete('fromCity', 'fromCityDropdown');
-        setupCityAutocomplete('toCity', 'toCityDropdown');
+        // City autocomplete
+        const cityInputs = ['from_city', 'to_city'];
+        const cityTimers = {};
 
-        const photoPreview = document.getElementById('photoPreview');
-        const photoInput = document.getElementById('photoInput');
+        cityInputs.forEach(fieldId => {
+            const input = document.getElementById(fieldId);
+            const dropdown = document.getElementById(`${fieldId}_dropdown`);
 
-        photoInput.addEventListener('change', function(e) {
-            photoPreview.innerHTML = '';
-            const files = e.target.files;
-            
-            for (let file of files) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    photoPreview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
+            input.addEventListener('input', () => {
+                clearTimeout(cityTimers[fieldId]);
+                const q = input.value.trim();
+                if (q.length < 1) { dropdown.classList.remove('open'); return; }
+
+                cityTimers[fieldId] = setTimeout(() => fetchCities(q, fieldId), 200);
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => dropdown.classList.remove('open'), 200);
+            });
         });
 
-        function showToast(message, type) {
-            const toast = document.getElementById('toast');
-            const toastOverlay = document.getElementById('toastOverlay');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            toast.className = 'toast';
-            toast.classList.add(type);
-            
-            const icons = {
-                'success': '✅',
-                'error': '❌',
-                'warning': '⏳'
-            };
-            
-            toastIcon.textContent = icons[type] || '📮';
-            toastMessage.textContent = message;
-            
-            toastOverlay.classList.add('show');
-            toast.classList.add('show');
+        async function fetchCities(q, fieldId) {
+            try {
+                const res = await fetch(`${API_URL}/api/cities?q=${encodeURIComponent(q)}&_=${Date.now()}`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                showCityDropdown(data.cities, fieldId);
+            } catch(e) {}
         }
 
-        function closeToast() {
-            document.getElementById('toast').classList.remove('show');
-            document.getElementById('toastOverlay').classList.remove('show');
+        function showCityDropdown(cities, fieldId) {
+            const dropdown = document.getElementById(`${fieldId}_dropdown`);
+            const input = document.getElementById(fieldId);
+            if (!cities || cities.length === 0) { dropdown.classList.remove('open'); return; }
+
+            dropdown.innerHTML = '';
+            cities.forEach(city => {
+                const div = document.createElement('div');
+                div.className = 'city-option';
+                div.textContent = city;
+                div.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    input.value = city;
+                    dropdown.classList.remove('open');
+                });
+                dropdown.appendChild(div);
+            });
+            dropdown.classList.add('open');
         }
 
-        document.getElementById('submissionForm').addEventListener('submit', async function(e) {
+        // Photo upload
+        const photoInput = document.getElementById('photos');
+        const photoPreview = document.getElementById('photoPreview');
+        let selectedFiles = [];
+
+        photoInput.addEventListener('change', () => {
+            Array.from(photoInput.files).forEach(file => {
+                if (selectedFiles.length >= 3) return;
+                selectedFiles.push(file);
+            });
+            renderPreviews();
+            photoInput.value = '';
+        });
+
+        function renderPreviews() {
+            photoPreview.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const item = document.createElement('div');
+                    item.className = 'photo-preview-item';
+                    item.innerHTML = `
+                        <img src="${e.target.result}" alt="Фото ${index+1}">
+                        <button class="photo-remove" data-index="${index}">×</button>
+                    `;
+                    item.querySelector('.photo-remove').addEventListener('click', () => {
+                        selectedFiles.splice(index, 1);
+                        renderPreviews();
+                    });
+                    photoPreview.appendChild(item);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Form submit
+        document.getElementById('submissionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Отправка...';
-
-            const formData = new FormData(this);
-            
-            if (vkUserId) {
-                formData.append('vk_user_id', vkUserId);
-            }
+            submitBtn.textContent = 'Отправляем...';
 
             try {
-                console.log('Отправка формы...');
+                const form = e.target;
+                const formData = new FormData();
+
+                formData.append('type', form.type.value);
+                formData.append('from_city', form.from_city.value.trim());
+                formData.append('to_city', form.to_city.value.trim());
+                if (form.date.value) formData.append('date', form.date.value);
+                formData.append('what', form.what.value);
+                if (form.weight.value) formData.append('weight', form.weight.value.trim());
+                if (form.comment.value) formData.append('comment', form.comment.value.trim());
+                if (form.contact.value) formData.append('contact', form.contact.value.trim());
+                if (vkUserId) formData.append('vk_user_id', vkUserId);
+
+                selectedFiles.forEach(file => formData.append('photos', file));
+
                 const response = await fetch(`${API_URL}/api/submit`, {
                     method: 'POST',
+                    headers: { 'ngrok-skip-browser-warning': 'true' },
                     body: formData
                 });
 
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
                 const result = await response.json();
-                console.log('Result:', result);
 
-                if (result.status === 'published') {
-                    showToast('Заявка успешно опубликована!', 'success');
-                    document.getElementById('submissionForm').reset();
+                if (result.status === 'success') {
+                    showToast('✅ Заявка успешно опубликована!', 'success');
+                    form.reset();
+                    selectedFiles = [];
                     photoPreview.innerHTML = '';
                 } else if (result.status === 'manual') {
-                    showToast('Ваша заявка отправлена на модерацию', 'warning');
-                    document.getElementById('submissionForm').reset();
+                    showToast('⏳ Заявка отправлена на модерацию', 'warning');
+                    form.reset();
+                    selectedFiles = [];
                     photoPreview.innerHTML = '';
-                } else if (result.status === 'rejected') {
-                    showToast(result.message || 'Заявка отклонена', 'error');
                 } else {
-                    showToast(result.message || 'Неизвестный статус', 'error');
+                    showToast(result.message || 'Ошибка. Попробуйте ещё раз.', 'error');
                 }
 
             } catch (error) {
-                console.error('Submit error:', error);
-                showToast('Ошибка отправки. Проверьте подключение к интернету.', 'error');
+                showToast('Ошибка соединения. Проверьте интернет.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Отправить заявку';
