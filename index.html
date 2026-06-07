@@ -7,38 +7,48 @@
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
         :root {
-            --bg:           #FBF7F2;
-            --surface:      #FFFFFF;
-            --surface-2:    #F4EEE6;
-            --text:         #1A1714;
-            --text-muted:   #8A8178;
-            --accent:       #FF6B35;
-            --accent-soft:  #FFE9DF;
-            --accent-2:     #1B9E77;
-            --accent-2-soft:#D4F0E7;
-            --border:       #ECE4D9;
-            --danger:       #E5484D;
-            --shadow:       0 2px 12px rgba(0,0,0,0.07);
-            --shadow-lg:    0 8px 32px rgba(0,0,0,0.12);
-            --r-sm: 12px;
-            --r:    16px;
-            --r-lg: 20px;
+            --bg:          #F0F2F5;
+            --surface:     #FFFFFF;
+            --surface-2:   #F0F2F5;
+            --surface-3:   #E4E7EC;
+            --text:        #111827;
+            --text-muted:  #4B5563;
+            --text-light:  #9CA3AF;
+            --accent:      #4F6EF7;
+            --accent-soft: #EEF2FF;
+            --accent-dark: #3B55D4;
+            --green:       #059669;
+            --green-soft:  #D1FAE5;
+            --border:      #D1D5DB;
+            --border-dark: #9CA3AF;
+            --danger:      #DC2626;
+            --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow:      0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg:   0 10px 32px rgba(0,0,0,0.12);
+            --r-sm: 10px;
+            --r:    14px;
+            --r-lg: 18px;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg:           #14110E;
-                --surface:      #1E1A16;
-                --surface-2:    #2A2520;
-                --text:         #F5F0E9;
-                --text-muted:   #9A9087;
-                --accent:       #FF7D4D;
-                --accent-soft:  #3A2A20;
-                --accent-2:     #22B888;
-                --accent-2-soft:#1A3028;
-                --border:       #332D27;
-                --shadow:       0 2px 12px rgba(0,0,0,0.3);
-                --shadow-lg:    0 8px 32px rgba(0,0,0,0.4);
+                --bg:          #0F1117;
+                --surface:     #1A1D27;
+                --surface-2:   #22263A;
+                --surface-3:   #2A2F47;
+                --text:        #F9FAFB;
+                --text-muted:  #9CA3AF;
+                --text-light:  #6B7280;
+                --accent:      #6381F8;
+                --accent-soft: #1E2340;
+                --accent-dark: #4F6EF7;
+                --green:       #10B981;
+                --green-soft:  #042F1E;
+                --border:      #2D3348;
+                --border-dark: #3D4460;
+                --shadow-sm:   0 1px 3px rgba(0,0,0,0.3);
+                --shadow:      0 4px 12px rgba(0,0,0,0.3);
+                --shadow-lg:   0 10px 32px rgba(0,0,0,0.4);
             }
         }
 
@@ -50,148 +60,243 @@
             color: var(--text);
             min-height: 100vh;
             padding-bottom: 88px;
+            font-size: 16px;
+            line-height: 1.5;
         }
         @media (min-width: 800px) { body { padding-bottom: 0; } }
 
-        /* Header */
+        /* ── Header ── */
         .app-header {
-            padding: 20px 20px 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+        }
+        .header-inner {
             max-width: 1040px;
             margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .app-logo     { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
-        .app-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .app-logo-icon { font-size: 24px; }
+        .app-logo-text {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: var(--text);
+        }
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-left: auto;
+            display: none;
+        }
+        @media (min-width: 600px) { .app-subtitle { display: block; } }
 
-        /* Layout */
-        .layout { max-width: 520px; margin: 0 auto; padding: 20px 16px; }
-
+        /* ── Layout ── */
+        .layout {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
         @media (min-width: 800px) {
             .layout {
                 max-width: 1040px;
                 display: grid;
-                grid-template-columns: 1fr 360px;
-                gap: 28px;
-                padding: 28px;
+                grid-template-columns: 1fr 340px;
+                gap: 24px;
+                padding: 24px 24px;
                 align-items: start;
             }
         }
 
-        /* Section label */
+        /* ── Section label ── */
         .slabel {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
             color: var(--text-muted);
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .section { margin-bottom: 20px; }
+        .section { margin-bottom: 16px; }
 
-        /* Type cards */
+        /* ── Card shell ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ── Type cards ── */
         .type-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         .type-card {
             background: var(--surface);
             border: 2px solid var(--border);
             border-radius: var(--r-lg);
-            padding: 18px 12px 16px;
+            padding: 20px 14px 18px;
             cursor: pointer;
             text-align: center;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
         }
-        .type-card:active { transform: scale(0.96); }
-        .type-card.sel-offer    { border-color: var(--accent);   background: var(--accent-soft);   box-shadow: 0 4px 16px rgba(255,107,53,0.18); }
-        .type-card.sel-request  { border-color: var(--accent-2); background: var(--accent-2-soft); box-shadow: 0 4px 16px rgba(27,158,119,0.18); }
+        .type-card:active { transform: scale(0.97); }
+        .type-card:hover  { border-color: var(--border-dark); }
 
-        .tc-icon  { font-size: 28px; margin-bottom: 8px; display: block; }
-        .tc-title { font-size: 14px; font-weight: 700; line-height: 1.3; }
-        .tc-desc  { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .type-card.sel-offer {
+            border-color: var(--accent);
+            border-width: 2px;
+            background: var(--accent-soft);
+            box-shadow: 0 0 0 3px rgba(79,110,247,0.15);
+        }
+        .type-card.sel-request {
+            border-color: var(--green);
+            border-width: 2px;
+            background: var(--green-soft);
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.15);
+        }
 
-        /* Route card */
+        .tc-icon  { font-size: 32px; margin-bottom: 10px; display: block; }
+        .tc-title { font-size: 15px; font-weight: 700; line-height: 1.3; color: var(--text); }
+        .tc-desc  { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+        .tc-check {
+            display: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            margin: 8px auto 0;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: white;
+        }
+        .sel-offer  .tc-check { display: flex; background: var(--accent); }
+        .sel-request .tc-check { display: flex; background: var(--green); }
+
+        /* ── Route card ── */
         .route-card {
             background: var(--surface);
-            border: 1.5px solid var(--border);
+            border: 1px solid var(--border);
             border-radius: var(--r);
-            padding: 14px 14px 10px;
-            box-shadow: var(--shadow);
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
         }
-        .route-row { display: flex; align-items: center; gap: 10px; }
+        .route-row { display: flex; align-items: center; gap: 12px; }
 
-        .rdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .rdot.from { background: var(--accent); }
-        .rdot.to   { background: var(--accent-2); }
+        .rdot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+            border: 2px solid transparent;
+        }
+        .rdot.from { background: var(--accent); border-color: var(--accent); }
+        .rdot.to   { background: var(--green);  border-color: var(--green);  }
 
-        .rline-wrap { display: flex; align-items: center; padding: 5px 0; gap: 8px; }
+        .rline-wrap {
+            display: flex; align-items: center;
+            padding: 4px 0 4px 5px; gap: 10px;
+        }
         .rline {
-            width: 2px; height: 18px; margin-left: 4px;
-            background: linear-gradient(to bottom, var(--accent), var(--accent-2));
-            opacity: 0.4; border-radius: 2px; flex-shrink: 0;
+            width: 2px; height: 20px;
+            background: var(--border);
+            border-radius: 2px; flex-shrink: 0;
         }
 
         .swap-btn {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: var(--surface-2); border: 1.5px solid var(--border);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 15px; color: var(--text-muted);
-            transition: border-color 0.15s, color 0.15s;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: var(--text-muted);
+            transition: all 0.15s;
             flex-shrink: 0; margin-left: auto;
         }
-        .swap-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .swap-btn.spin  { animation: spin 0.28s ease; }
+        .swap-btn:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .swap-btn.spin { animation: spin 0.28s ease; }
         @keyframes spin { to { transform: rotate(180deg); } }
 
         .rinput-wrap { flex: 1; position: relative; }
+
         .rinput {
             width: 100%;
             background: var(--surface-2);
-            border: 1.5px solid transparent;
+            border: 1.5px solid var(--border);
             border-radius: var(--r-sm);
-            padding: 11px 34px 11px 13px;
+            padding: 12px 36px 12px 14px;
             font-size: 16px; font-family: inherit; color: var(--text);
-            transition: border-color 0.18s, background 0.18s;
+            transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
         }
-        .rinput::placeholder { color: var(--text-muted); }
-        .rinput:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+        .rinput::placeholder { color: var(--text-light); }
+        .rinput:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(79,110,247,0.12);
+        }
 
         .rclear {
-            position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; cursor: pointer;
-            color: var(--text-muted); font-size: 15px; padding: 4px; line-height: 1; display: none;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: var(--surface-3); border: none; cursor: pointer;
+            color: var(--text-muted); font-size: 13px;
+            width: 22px; height: 22px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            line-height: 1; transition: background 0.15s;
         }
-        .rinput:not(:placeholder-shown) ~ .rclear { display: block; }
+        .rclear:hover { background: var(--border); }
+        .rinput:not(:placeholder-shown) ~ .rclear { display: flex; }
 
+        /* Dropdown */
         .cdropdown {
             position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-            background: var(--surface); border: 1.5px solid var(--border);
-            border-radius: var(--r-sm); box-shadow: var(--shadow-lg);
+            background: var(--surface);
+            border: 1.5px solid var(--accent);
+            border-radius: var(--r-sm);
+            box-shadow: var(--shadow-lg);
             z-index: 200; display: none; overflow: hidden;
-            max-height: 220px; overflow-y: auto;
+            max-height: 240px; overflow-y: auto;
         }
         .cdropdown.open { display: block; }
 
         .coption {
-            padding: 11px 14px; font-size: 15px; cursor: pointer;
+            padding: 12px 16px; font-size: 15px; cursor: pointer;
             border-bottom: 1px solid var(--border); color: var(--text);
             transition: background 0.1s;
         }
         .coption:last-child { border-bottom: none; }
-        .coption:hover, .coption:active { background: var(--surface-2); }
+        .coption:hover, .coption:active {
+            background: var(--accent-soft); color: var(--accent);
+        }
 
+        /* Quick city pills */
         .quick-cities {
             display: flex; gap: 6px; flex-wrap: wrap;
-            margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+            margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .qcity-label {
+            width: 100%; font-size: 12px; font-weight: 600;
+            color: var(--text-light); margin-bottom: 2px;
         }
         .qcity {
-            background: var(--surface-2); border: 1.5px solid var(--border);
-            border-radius: 999px; padding: 5px 11px; font-size: 13px;
-            cursor: pointer; color: var(--text-muted);
-            transition: border-color 0.15s, color 0.15s; white-space: nowrap; user-select: none;
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            border-radius: 999px; padding: 6px 13px;
+            font-size: 13px; cursor: pointer; color: var(--text-muted);
+            font-weight: 500;
+            transition: all 0.15s; white-space: nowrap; user-select: none;
         }
-        .qcity:hover { border-color: var(--accent); color: var(--accent); }
+        .qcity:hover {
+            border-color: var(--accent); color: var(--accent);
+            background: var(--accent-soft);
+        }
 
-        /* Category chips */
+        /* ── Category chips ── */
         .cat-chips {
             display: flex; gap: 8px; overflow-x: auto;
             padding-bottom: 4px; scrollbar-width: none;
@@ -200,154 +305,214 @@
 
         .cchip {
             display: flex; flex-direction: column; align-items: center; gap: 5px;
-            padding: 12px 14px; background: var(--surface);
-            border: 2px solid var(--border); border-radius: var(--r);
-            cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 68px;
-            transition: border-color 0.15s, background 0.15s, transform 0.1s;
-            user-select: none; -webkit-tap-highlight-color: transparent;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--r);
+            cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 72px;
+            transition: all 0.15s; user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
+        .cchip:hover  { border-color: var(--border-dark); }
         .cchip:active { transform: scale(0.94); }
-        .cchip.sel    { border-color: var(--accent); background: var(--accent-soft); }
-        .cchip-icon   { font-size: 22px; }
-        .cchip-label  { font-size: 12px; font-weight: 600; }
-
-        /* Contact card */
-        .contact-card {
-            background: var(--surface); border: 1.5px solid var(--border);
-            border-radius: var(--r); padding: 14px; box-shadow: var(--shadow);
+        .cchip.sel {
+            border-color: var(--accent); background: var(--accent-soft);
+            box-shadow: 0 0 0 3px rgba(79,110,247,0.12);
         }
+        .cchip-icon  { font-size: 22px; }
+        .cchip-label { font-size: 12px; font-weight: 600; color: var(--text); }
 
+        /* ── Input / textarea ── */
         .field-input, .field-textarea {
             width: 100%;
-            background: var(--surface-2); border: 1.5px solid transparent;
-            border-radius: var(--r-sm); padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 12px 14px;
             font-size: 16px; font-family: inherit; color: var(--text);
-            transition: border-color 0.18s, background 0.18s;
+            transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
         }
-        .field-input::placeholder, .field-textarea::placeholder { color: var(--text-muted); }
-        .field-input:focus, .field-textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+        .field-input::placeholder, .field-textarea::placeholder { color: var(--text-light); }
+        .field-input:focus, .field-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(79,110,247,0.12);
+        }
         .field-textarea { resize: vertical; min-height: 80px; }
-        .field-helper { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+        .field-helper {
+            font-size: 12px; color: var(--text-muted);
+            margin-top: 7px; display: flex; align-items: center; gap: 5px;
+        }
 
-        /* Accordion */
+        /* ── Contact card ── */
+        .contact-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ── Accordion ── */
         .accordion {
-            background: var(--surface); border: 1.5px solid var(--border);
-            border-radius: var(--r); overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
         }
         .acc-toggle {
             width: 100%; display: flex; align-items: center; justify-content: space-between;
-            padding: 13px 16px; background: none; border: none; cursor: pointer;
-            font-size: 14px; font-weight: 600; color: var(--text-muted);
-            font-family: inherit; text-align: left;
+            padding: 14px 16px; background: none; border: none;
+            cursor: pointer; font-size: 14px; font-weight: 600;
+            color: var(--text-muted); font-family: inherit; text-align: left;
+            gap: 10px;
         }
+        .acc-toggle:hover { color: var(--text); }
         .acc-arrow { font-size: 11px; transition: transform 0.2s; flex-shrink: 0; }
         .accordion.open .acc-arrow { transform: rotate(180deg); }
-        .acc-body { display: none; padding: 4px 14px 14px; border-top: 1px solid var(--border); }
+        .acc-body {
+            display: none; padding: 0 14px 14px;
+            border-top: 1px solid var(--border);
+        }
         .accordion.open .acc-body { display: block; }
-        .acc-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin: 12px 0 6px; }
+        .acc-label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--text-muted); margin: 14px 0 6px;
+        }
 
-        /* Sticky CTA (mobile) */
+        /* ── Sticky CTA (mobile) ── */
         .sticky-cta {
             position: fixed; bottom: 0; left: 0; right: 0;
-            padding: 10px 16px 14px;
-            background: var(--bg); border-top: 1px solid var(--border);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            padding: 10px 16px max(14px, env(safe-area-inset-bottom));
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
             z-index: 300;
         }
         @media (min-width: 800px) { .sticky-cta { display: none; } }
 
-        /* Preview column */
+        /* ── Preview column (desktop only) ── */
         .preview-col { display: none; }
-        @media (min-width: 800px) { .preview-col { display: block; position: sticky; top: 28px; } }
+        @media (min-width: 800px) {
+            .preview-col { display: block; position: sticky; top: 24px; }
+        }
 
         .preview-card {
-            background: var(--surface); border: 1.5px solid var(--border);
-            border-radius: var(--r); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 16px;
+            box-shadow: var(--shadow-sm); margin-bottom: 12px;
         }
         .preview-post {
-            background: var(--surface-2); border-radius: var(--r-sm);
-            padding: 14px; font-size: 13px; line-height: 1.65;
-            white-space: pre-wrap; font-family: inherit; min-height: 150px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 14px; font-size: 13px; line-height: 1.7;
+            white-space: pre-wrap; font-family: inherit;
+            color: var(--text); min-height: 160px;
         }
-        .preview-placeholder { color: var(--text-muted); font-style: italic; }
+        .preview-placeholder { color: var(--text-light); font-style: italic; }
 
-        /* CTA button */
+        /* ── CTA button ── */
         .cta-btn {
             width: 100%; padding: 15px 18px;
             background: var(--accent); color: white;
             border: none; border-radius: var(--r);
-            font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
-            transition: filter 0.15s, transform 0.1s, background 0.2s;
+            font-size: 15px; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            box-shadow: 0 2px 8px rgba(79,110,247,0.35);
         }
-        .cta-btn:not(:disabled):hover  { filter: brightness(1.07); }
+        .cta-btn:not(:disabled):hover {
+            background: var(--accent-dark);
+            box-shadow: 0 4px 14px rgba(79,110,247,0.45);
+        }
         .cta-btn:not(:disabled):active { transform: scale(0.98); }
-        .cta-btn:disabled { background: var(--surface-2); color: var(--text-muted); cursor: not-allowed; }
+        .cta-btn:disabled {
+            background: var(--surface-3);
+            color: var(--text-light);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
         .cta-main  { font-size: 15px; font-weight: 700; }
-        .cta-hint  { font-size: 12px; opacity: 0.82; font-weight: 500; margin-top: 2px; }
+        .cta-hint  { font-size: 12px; opacity: 0.85; margin-top: 2px; }
         .cta-arrow { font-size: 18px; flex-shrink: 0; }
 
-        /* Toast — bottom center, always visible */
+        /* ── Toast — bottom center, always visible ── */
         .toast {
             position: fixed;
             bottom: 96px; left: 50%;
-            transform: translateX(-50%) translateY(16px);
+            transform: translateX(-50%) translateY(20px);
             opacity: 0;
-            background: var(--surface); border: 1.5px solid var(--border);
-            border-radius: var(--r); padding: 13px 20px; box-shadow: var(--shadow-lg);
+            background: var(--surface);
+            border-radius: var(--r);
+            padding: 14px 22px;
+            box-shadow: var(--shadow-lg);
             z-index: 999;
-            max-width: min(340px, calc(100vw - 32px)); width: max-content;
+            max-width: min(360px, calc(100vw - 32px));
+            width: max-content;
             text-align: center; font-weight: 600; font-size: 14px;
             pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            border-left: 4px solid var(--border);
+            transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.success { border-color: var(--accent-2); color: var(--accent-2); }
-        .toast.error   { border-color: var(--danger);   color: var(--danger);   }
-        .toast.warning { border-color: var(--accent);   color: var(--accent);   }
-        @media (min-width: 800px) { .toast { bottom: 32px; } }
+        .toast.success { border-left-color: var(--green);  color: var(--green);  }
+        .toast.error   { border-left-color: var(--danger); color: var(--danger); }
+        .toast.warning { border-left-color: var(--accent); color: var(--accent); }
+        @media (min-width: 800px) { .toast { bottom: 28px; } }
 
-        /* Success screen */
-        .success-screen { display: none; text-align: center; padding: 48px 24px; }
+        /* ── Success screen ── */
+        .success-screen { display: none; text-align: center; padding: 48px 16px; }
         .success-screen.show { display: block; }
-        .success-icon     { font-size: 60px; margin-bottom: 14px; }
-        .success-title    { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-        .success-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; }
+        .success-icon  { font-size: 64px; margin-bottom: 16px; }
+        .success-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .success-sub   { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
         .success-vk-link {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 13px 24px; background: var(--accent-soft); color: var(--accent);
-            border-radius: var(--r); font-weight: 700; font-size: 15px; text-decoration: none;
+            padding: 13px 24px; background: var(--accent-soft);
+            color: var(--accent); border: 1.5px solid var(--accent);
+            border-radius: var(--r); font-weight: 700; font-size: 15px;
+            text-decoration: none; margin-bottom: 10px;
         }
         .new-btn {
             display: block; width: 100%; padding: 14px;
-            background: var(--surface-2); border: none; border-radius: var(--r);
-            font-size: 15px; font-weight: 600; color: var(--text-muted);
-            cursor: pointer; font-family: inherit; margin-top: 10px;
-            transition: background 0.15s;
+            background: var(--surface-2); border: 1.5px solid var(--border);
+            border-radius: var(--r); font-size: 15px; font-weight: 600;
+            color: var(--text-muted); cursor: pointer; font-family: inherit;
+            margin-top: 10px; transition: background 0.15s, border-color 0.15s;
         }
-        .new-btn:hover { background: var(--border); }
+        .new-btn:hover { background: var(--surface-3); border-color: var(--border-dark); }
     </style>
 </head>
 <body>
 
 <header class="app-header">
-    <div class="app-logo">📦 Передам Посылку</div>
-    <div class="app-subtitle">Найди попутчика для посылки — бесплатно</div>
+    <div class="header-inner">
+        <span class="app-logo-icon">📦</span>
+        <span class="app-logo-text">Передам Посылку</span>
+        <span class="app-subtitle">Бесплатная передача посылок попутчиками</span>
+    </div>
 </header>
 
 <div class="layout">
 
+    <!-- ── Form column ── -->
     <main>
-        <!-- Success screen -->
+
+        <!-- Success -->
         <div class="success-screen" id="successScreen">
             <div class="success-icon">✅</div>
             <div class="success-title">Заявка опубликована!</div>
-            <div class="success-subtitle" id="successMsg">Ваша заявка появилась в группе ВКонтакте</div>
+            <div class="success-sub" id="successMsg">Ваша заявка появилась в группе ВКонтакте</div>
             <a id="postLink" href="#" target="_blank" class="success-vk-link" style="display:none">🔗 Посмотреть пост в ВК</a>
             <button class="new-btn" onclick="resetForm()">+ Создать ещё одну заявку</button>
         </div>
 
         <div id="formWrap">
+
             <!-- Type -->
             <div class="section">
                 <div class="slabel">Что вы хотите сделать?</div>
@@ -356,46 +521,50 @@
                         <span class="tc-icon">📦</span>
                         <div class="tc-title">Могу передать</div>
                         <div class="tc-desc">Еду и возьму посылку</div>
+                        <div class="tc-check">✓</div>
                     </div>
                     <div class="type-card" id="card-request" onclick="selectType('request')">
                         <span class="tc-icon">🔍</span>
                         <div class="tc-title">Нужно передать</div>
                         <div class="tc-desc">Ищу попутчика</div>
+                        <div class="tc-check">✓</div>
                     </div>
                 </div>
             </div>
 
             <!-- Route -->
             <div class="section">
-                <div class="slabel">Маршрут</div>
+                <div class="slabel">📍 Маршрут</div>
                 <div class="route-card">
                     <div class="route-row">
                         <div class="rdot from"></div>
                         <div class="rinput-wrap">
                             <input class="rinput" id="from_city" placeholder="Откуда" autocomplete="off">
-                            <button class="rclear" onclick="clearCity('from')">✕</button>
+                            <button class="rclear" onclick="clearCity('from')" tabindex="-1">✕</button>
                             <div class="cdropdown" id="from_drop"></div>
                         </div>
                     </div>
                     <div class="rline-wrap">
                         <div class="rline"></div>
-                        <button class="swap-btn" id="swapBtn" onclick="swapCities()">⇅</button>
+                        <button class="swap-btn" id="swapBtn" onclick="swapCities()" title="Поменять города местами">⇅</button>
                     </div>
                     <div class="route-row">
                         <div class="rdot to"></div>
                         <div class="rinput-wrap">
                             <input class="rinput" id="to_city" placeholder="Куда" autocomplete="off">
-                            <button class="rclear" onclick="clearCity('to')">✕</button>
+                            <button class="rclear" onclick="clearCity('to')" tabindex="-1">✕</button>
                             <div class="cdropdown" id="to_drop"></div>
                         </div>
                     </div>
-                    <div class="quick-cities" id="quickCities"></div>
+                    <div class="quick-cities" id="quickCities">
+                        <span class="qcity-label">Популярные города</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Category -->
             <div class="section">
-                <div class="slabel">Что передать</div>
+                <div class="slabel">📦 Что передать</div>
                 <div class="cat-chips">
                     <div class="cchip" data-v="Посылка"   onclick="selectCat(this)"><span class="cchip-icon">📦</span><span class="cchip-label">Посылка</span></div>
                     <div class="cchip" data-v="Документы" onclick="selectCat(this)"><span class="cchip-icon">📄</span><span class="cchip-label">Документы</span></div>
@@ -407,10 +576,13 @@
 
             <!-- Contact -->
             <div class="section">
-                <div class="slabel">Как с вами связаться</div>
+                <div class="slabel">✉️ Как с вами связаться</div>
                 <div class="contact-card">
                     <input class="field-input" id="contact" placeholder="@telegram, +7…, vk.com/id…" oninput="syncPreview()">
-                    <div class="field-helper">Оставьте пустым — напишут в ВКонтакте напрямую</div>
+                    <div class="field-helper">
+                        <span>💡</span>
+                        <span>Оставьте пустым — напишут в ВКонтакте напрямую</span>
+                    </div>
                 </div>
             </div>
 
@@ -422,23 +594,28 @@
                         <span class="acc-arrow">▼</span>
                     </button>
                     <div class="acc-body">
-                        <label class="acc-label">Дата поездки <span style="font-weight:400">(необязательно)</span></label>
+                        <label class="acc-label">📅 Дата поездки <span style="font-weight:400;color:var(--text-light)">(необязательно)</span></label>
                         <input class="field-input" type="date" id="date" oninput="syncPreview()">
-                        <label class="acc-label">Вес / габариты <span style="font-weight:400">(необязательно)</span></label>
+
+                        <label class="acc-label">⚖️ Вес / габариты <span style="font-weight:400;color:var(--text-light)">(необязательно)</span></label>
                         <input class="field-input" id="weight" placeholder="напр. 2 кг, небольшая коробка" oninput="syncPreview()">
-                        <label class="acc-label">Комментарий <span style="font-weight:400">(необязательно)</span></label>
+
+                        <label class="acc-label">💬 Комментарий <span style="font-weight:400;color:var(--text-light)">(необязательно)</span></label>
                         <textarea class="field-textarea" id="comment" placeholder="Дополнительная информация…" oninput="syncPreview()"></textarea>
                     </div>
                 </div>
             </div>
-        </div>
+
+        </div><!-- /formWrap -->
     </main>
 
-    <!-- Desktop preview -->
+    <!-- ── Preview column (desktop) ── -->
     <aside class="preview-col">
         <div class="preview-card">
-            <div class="slabel">Предпросмотр поста в ВК</div>
-            <div class="preview-post" id="previewPost"><span class="preview-placeholder">Заполните форму — здесь появится предпросмотр того, что увидят люди в ВКонтакте</span></div>
+            <div class="slabel">👁 Предпросмотр поста в ВК</div>
+            <div class="preview-post" id="previewPost">
+                <span class="preview-placeholder">Заполните форму — здесь появится предпросмотр поста в ВКонтакте</span>
+            </div>
         </div>
         <button class="cta-btn" id="ctaDesktop" disabled onclick="doSubmit()">
             <div>
@@ -462,7 +639,7 @@
     </button>
 </div>
 
-<!-- Toast: bottom-center, always on screen without scrolling -->
+<!-- Toast: bottom-center, always visible in viewport -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -472,13 +649,12 @@
     let selType = null, selCat = null, vkUid = null;
     let cities = [], lastFocused = 'from_city';
 
-    // VK Bridge
     try {
         vkBridge.send('VKWebAppInit');
         vkBridge.send('VKWebAppGetUserInfo').then(d => { vkUid = d.id; }).catch(() => {});
     } catch(e) {}
 
-    // Load cities once from static JSON (no API round-trip for autocomplete)
+    // Load cities once — served statically from GitHub Pages, no API call per keystroke
     fetch('cities.json').then(r => r.ok ? r.json() : []).then(d => { cities = d; }).catch(() => {});
 
     // Quick city chips
@@ -490,9 +666,9 @@
         s.onclick = () => {
             const f = document.getElementById('from_city');
             const t = document.getElementById('to_city');
-            if (!f.value)      { f.value = city; }
-            else if (!t.value) { t.value = city; }
-            else               { document.getElementById(lastFocused).value = city; }
+            if (!f.value)      f.value = city;
+            else if (!t.value) t.value = city;
+            else document.getElementById(lastFocused).value = city;
             syncPreview(); updateCTA();
         };
         qcEl.appendChild(s);
@@ -579,9 +755,9 @@
         const to   = document.getElementById('to_city').value.trim();
         const ok   = !!(selType && from && to && selCat);
         ['ctaMobile','ctaDesktop'].forEach(id => { document.getElementById(id).disabled = !ok; });
-        const hint = ok ? `${from} → ${to} · ${selCat}`
-            : !selType   ? 'Выберите тип заявки'
-            : (!from||!to)? 'Укажите маршрут'
+        const hint = ok           ? `${from} → ${to} · ${selCat}`
+            : !selType            ? 'Выберите тип заявки'
+            : (!from || !to)      ? 'Укажите маршрут'
             : 'Выберите категорию';
         document.getElementById('hintMobile').textContent  = hint;
         document.getElementById('hintDesktop').textContent = hint;
@@ -594,23 +770,23 @@
         const weight  = document.getElementById('weight').value.trim();
         const comment = document.getElementById('comment').value.trim();
         const contact = document.getElementById('contact').value.trim();
-        const preview = document.getElementById('previewPost');
+        const el      = document.getElementById('previewPost');
 
         if (!selType && !from && !to) {
-            preview.innerHTML = '<span class="preview-placeholder">Заполните форму — здесь появится предпросмотр того, что увидят люди в ВКонтакте</span>';
+            el.innerHTML = '<span class="preview-placeholder">Заполните форму — здесь появится предпросмотр поста в ВКонтакте</span>';
             return;
         }
 
-        const typeLabel = selType === 'offer' ? 'МОГУ ПЕРЕДАТЬ' : 'НУЖНО ПЕРЕДАТЬ';
-        const typeEmoji = selType === 'offer' ? '📦' : '🔍';
-        const catEmoji  = {Посылка:'📦',Документы:'📄',Животные:'🐾',Вещи:'👕',Другое:'📮'}[selCat] || '📮';
+        const tEmoji = selType === 'offer' ? '📦' : '🔍';
+        const tLabel = selType === 'offer' ? 'МОГУ ПЕРЕДАТЬ' : 'НУЖНО ПЕРЕДАТЬ';
+        const cEmoji = {Посылка:'📦',Документы:'📄',Животные:'🐾',Вещи:'👕',Другое:'📮'}[selCat] || '📮';
 
-        const lines = [`${typeEmoji} ${typeLabel}`, '━━━━━━━━━━━━━'];
+        const lines = [`${tEmoji} ${tLabel}`, '━━━━━━━━━━━━━'];
         if (from || to) lines.push(`📍 ${from||'?'} → ${to||'?'}`);
         if (date) {
             try { lines.push('📅 ' + new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})); } catch(e){}
         }
-        if (selCat) lines.push(`${catEmoji} ${selCat}`);
+        if (selCat) lines.push(`${cEmoji} ${selCat}`);
         if (weight) lines.push(`⚖️ ${weight}`);
         if (comment) lines.push('', `💬 ${comment}`);
         if (contact) lines.push('', `✉️ ${contact}`);
@@ -621,7 +797,7 @@
         if (to && to !== from) tags.push('#' + to.replace(/\s/g,''));
         lines.push(tags.join(' '));
 
-        preview.textContent = lines.join('\n');
+        el.textContent = lines.join('\n');
         updateCTA();
     }
 
@@ -677,7 +853,6 @@
         document.getElementById('successScreen').classList.add('show');
         document.querySelector('.sticky-cta').style.display = 'none';
         document.getElementById('ctaDesktop').style.display = 'none';
-
         if (postId) {
             const link = document.getElementById('postLink');
             link.href = `https://vk.com/wall-47570832_${postId}`;
@@ -685,7 +860,6 @@
         }
         document.getElementById('successMsg').textContent =
             postId ? 'Ваша заявка опубликована в группе ВКонтакте' : 'Заявка отправлена на проверку';
-
         try { vkBridge.send('VKWebAppTapticNotificationOccurred', { type: 'success' }); } catch(e) {}
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -707,7 +881,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Toast — bottom center, always in viewport
+    // Toast — bottom center, always in viewport without scrolling
     function showToast(msg, type = 'success') {
         const t = document.getElementById('toast');
         t.textContent = msg;
