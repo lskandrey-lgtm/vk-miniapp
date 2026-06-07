@@ -276,12 +276,11 @@
         /* Quick city pills */
         .quick-cities {
             display: flex; gap: 6px; flex-wrap: wrap;
-            margin-top: 12px; padding-top: 12px;
-            border-top: 1px solid var(--border);
+            margin-bottom: 10px;
         }
         .qcity-label {
             width: 100%; font-size: 12px; font-weight: 600;
-            color: var(--text-light); margin-bottom: 2px;
+            color: var(--text-light); margin-bottom: 4px;
         }
         .qcity {
             background: var(--surface-2);
@@ -535,6 +534,10 @@
             <!-- Route -->
             <div class="section">
                 <div class="slabel">📍 Маршрут</div>
+                <!-- Quick cities ABOVE the inputs — never overlaps the dropdown -->
+                <div class="quick-cities" id="quickCities">
+                    <span class="qcity-label">Популярные города</span>
+                </div>
                 <div class="route-card">
                     <div class="route-row">
                         <div class="rdot from"></div>
@@ -555,9 +558,6 @@
                             <button class="rclear" onclick="clearCity('to')" tabindex="-1">✕</button>
                             <div class="cdropdown" id="to_drop"></div>
                         </div>
-                    </div>
-                    <div class="quick-cities" id="quickCities">
-                        <span class="qcity-label">Популярные города</span>
                     </div>
                 </div>
             </div>
