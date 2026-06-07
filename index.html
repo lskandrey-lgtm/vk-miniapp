@@ -6,479 +6,717 @@
     <title>Передам Посылку</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <style>
+        :root {
+            --bg:           #FBF7F2;
+            --surface:      #FFFFFF;
+            --surface-2:    #F4EEE6;
+            --text:         #1A1714;
+            --text-muted:   #8A8178;
+            --accent:       #FF6B35;
+            --accent-soft:  #FFE9DF;
+            --accent-2:     #1B9E77;
+            --accent-2-soft:#D4F0E7;
+            --border:       #ECE4D9;
+            --danger:       #E5484D;
+            --shadow:       0 2px 12px rgba(0,0,0,0.07);
+            --shadow-lg:    0 8px 32px rgba(0,0,0,0.12);
+            --r-sm: 12px;
+            --r:    16px;
+            --r-lg: 20px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg:           #14110E;
+                --surface:      #1E1A16;
+                --surface-2:    #2A2520;
+                --text:         #F5F0E9;
+                --text-muted:   #9A9087;
+                --accent:       #FF7D4D;
+                --accent-soft:  #3A2A20;
+                --accent-2:     #22B888;
+                --accent-2-soft:#1A3028;
+                --border:       #332D27;
+                --shadow:       0 2px 12px rgba(0,0,0,0.3);
+                --shadow-lg:    0 8px 32px rgba(0,0,0,0.4);
+            }
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
+            padding-bottom: 88px;
+        }
+        @media (min-width: 800px) { body { padding-bottom: 0; } }
+
+        /* Header */
+        .app-header {
+            padding: 20px 20px 0;
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+        .app-logo     { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+        .app-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Layout */
+        .layout { max-width: 520px; margin: 0 auto; padding: 20px 16px; }
+
+        @media (min-width: 800px) {
+            .layout {
+                max-width: 1040px;
+                display: grid;
+                grid-template-columns: 1fr 360px;
+                gap: 28px;
+                padding: 28px;
+                align-items: start;
+            }
         }
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 26px;
+        /* Section label */
+        .slabel {
+            font-size: 11px;
             font-weight: 700;
-            margin-bottom: 6px;
-            color: #1a1a1a;
-            text-align: center;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 28px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-            position: relative;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
         }
+        .section { margin-bottom: 20px; }
 
-        .required::after { content: " *"; color: #ff4757; }
+        /* Type cards */
+        .type-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 13px 15px;
-            border: 2px solid #e1e8ed;
-            border-radius: 12px;
-            font-size: 15px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-            color: #1a1a1a;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
-        }
-
-        select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23667eea' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
-
-        textarea { resize: vertical; min-height: 80px; }
-
-        .city-wrapper { position: relative; }
-
-        .city-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 2px solid #667eea;
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        .city-dropdown.open { display: block; }
-
-        .city-option {
-            padding: 10px 15px;
+        .type-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 18px 12px 16px;
             cursor: pointer;
-            font-size: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.15s;
-        }
-
-        .city-option:hover, .city-option.selected { background: #f0f3ff; color: #667eea; font-weight: 500; }
-        .city-option:last-child { border-bottom: none; }
-
-        .photo-upload {
-            border: 2px dashed #d0d7de;
-            border-radius: 12px;
-            padding: 20px;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f9fa;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
+        }
+        .type-card:active { transform: scale(0.96); }
+        .type-card.sel-offer    { border-color: var(--accent);   background: var(--accent-soft);   box-shadow: 0 4px 16px rgba(255,107,53,0.18); }
+        .type-card.sel-request  { border-color: var(--accent-2); background: var(--accent-2-soft); box-shadow: 0 4px 16px rgba(27,158,119,0.18); }
+
+        .tc-icon  { font-size: 28px; margin-bottom: 8px; display: block; }
+        .tc-title { font-size: 14px; font-weight: 700; line-height: 1.3; }
+        .tc-desc  { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+        /* Route card */
+        .route-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px 14px 10px;
+            box-shadow: var(--shadow);
+        }
+        .route-row { display: flex; align-items: center; gap: 10px; }
+
+        .rdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .rdot.from { background: var(--accent); }
+        .rdot.to   { background: var(--accent-2); }
+
+        .rline-wrap { display: flex; align-items: center; padding: 5px 0; gap: 8px; }
+        .rline {
+            width: 2px; height: 18px; margin-left: 4px;
+            background: linear-gradient(to bottom, var(--accent), var(--accent-2));
+            opacity: 0.4; border-radius: 2px; flex-shrink: 0;
         }
 
-        .photo-upload:hover { border-color: #667eea; background: #f0f3ff; }
-
-        .photo-upload input { display: none; }
-
-        .photo-upload-label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
+        .swap-btn {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--surface-2); border: 1.5px solid var(--border);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: var(--text-muted);
+            transition: border-color 0.15s, color 0.15s;
+            flex-shrink: 0; margin-left: auto;
         }
+        .swap-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .swap-btn.spin  { animation: spin 0.28s ease; }
+        @keyframes spin { to { transform: rotate(180deg); } }
 
-        .photo-icon { font-size: 32px; }
-
-        .photo-upload-text { color: #555; font-size: 14px; }
-        .photo-upload-hint { color: #999; font-size: 12px; }
-
-        .photo-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .photo-preview-item {
-            position: relative;
-            width: 80px;
-            height: 80px;
-        }
-
-        .photo-preview-item img {
+        .rinput-wrap { flex: 1; position: relative; }
+        .rinput {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #e1e8ed;
+            background: var(--surface-2);
+            border: 1.5px solid transparent;
+            border-radius: var(--r-sm);
+            padding: 11px 34px 11px 13px;
+            font-size: 16px; font-family: inherit; color: var(--text);
+            transition: border-color 0.18s, background 0.18s;
+        }
+        .rinput::placeholder { color: var(--text-muted); }
+        .rinput:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+
+        .rclear {
+            position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); font-size: 15px; padding: 4px; line-height: 1; display: none;
+        }
+        .rinput:not(:placeholder-shown) ~ .rclear { display: block; }
+
+        .cdropdown {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: var(--r-sm); box-shadow: var(--shadow-lg);
+            z-index: 200; display: none; overflow: hidden;
+            max-height: 220px; overflow-y: auto;
+        }
+        .cdropdown.open { display: block; }
+
+        .coption {
+            padding: 11px 14px; font-size: 15px; cursor: pointer;
+            border-bottom: 1px solid var(--border); color: var(--text);
+            transition: background 0.1s;
+        }
+        .coption:last-child { border-bottom: none; }
+        .coption:hover, .coption:active { background: var(--surface-2); }
+
+        .quick-cities {
+            display: flex; gap: 6px; flex-wrap: wrap;
+            margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+        }
+        .qcity {
+            background: var(--surface-2); border: 1.5px solid var(--border);
+            border-radius: 999px; padding: 5px 11px; font-size: 13px;
+            cursor: pointer; color: var(--text-muted);
+            transition: border-color 0.15s, color 0.15s; white-space: nowrap; user-select: none;
+        }
+        .qcity:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Category chips */
+        .cat-chips {
+            display: flex; gap: 8px; overflow-x: auto;
+            padding-bottom: 4px; scrollbar-width: none;
+        }
+        .cat-chips::-webkit-scrollbar { display: none; }
+
+        .cchip {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            padding: 12px 14px; background: var(--surface);
+            border: 2px solid var(--border); border-radius: var(--r);
+            cursor: pointer; white-space: nowrap; flex-shrink: 0; min-width: 68px;
+            transition: border-color 0.15s, background 0.15s, transform 0.1s;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        .cchip:active { transform: scale(0.94); }
+        .cchip.sel    { border-color: var(--accent); background: var(--accent-soft); }
+        .cchip-icon   { font-size: 22px; }
+        .cchip-label  { font-size: 12px; font-weight: 600; }
+
+        /* Contact card */
+        .contact-card {
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: var(--r); padding: 14px; box-shadow: var(--shadow);
         }
 
-        .photo-remove {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-
-        .submit-btn {
+        .field-input, .field-textarea {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 8px;
-            letter-spacing: 0.5px;
+            background: var(--surface-2); border: 1.5px solid transparent;
+            border-radius: var(--r-sm); padding: 12px 14px;
+            font-size: 16px; font-family: inherit; color: var(--text);
+            transition: border-color 0.18s, background 0.18s;
         }
+        .field-input::placeholder, .field-textarea::placeholder { color: var(--text-muted); }
+        .field-input:focus, .field-textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+        .field-textarea { resize: vertical; min-height: 80px; }
+        .field-helper { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 
-        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
-        .submit-btn:active { transform: translateY(0); }
-        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        /* Accordion */
+        .accordion {
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: var(--r); overflow: hidden;
+        }
+        .acc-toggle {
+            width: 100%; display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 16px; background: none; border: none; cursor: pointer;
+            font-size: 14px; font-weight: 600; color: var(--text-muted);
+            font-family: inherit; text-align: left;
+        }
+        .acc-arrow { font-size: 11px; transition: transform 0.2s; flex-shrink: 0; }
+        .accordion.open .acc-arrow { transform: rotate(180deg); }
+        .acc-body { display: none; padding: 4px 14px 14px; border-top: 1px solid var(--border); }
+        .accordion.open .acc-body { display: block; }
+        .acc-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin: 12px 0 6px; }
 
+        /* Sticky CTA (mobile) */
+        .sticky-cta {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 10px 16px 14px;
+            background: var(--bg); border-top: 1px solid var(--border);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            z-index: 300;
+        }
+        @media (min-width: 800px) { .sticky-cta { display: none; } }
+
+        /* Preview column */
+        .preview-col { display: none; }
+        @media (min-width: 800px) { .preview-col { display: block; position: sticky; top: 28px; } }
+
+        .preview-card {
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: var(--r); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px;
+        }
+        .preview-post {
+            background: var(--surface-2); border-radius: var(--r-sm);
+            padding: 14px; font-size: 13px; line-height: 1.65;
+            white-space: pre-wrap; font-family: inherit; min-height: 150px;
+        }
+        .preview-placeholder { color: var(--text-muted); font-style: italic; }
+
+        /* CTA button */
+        .cta-btn {
+            width: 100%; padding: 15px 18px;
+            background: var(--accent); color: white;
+            border: none; border-radius: var(--r);
+            font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+            transition: filter 0.15s, transform 0.1s, background 0.2s;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .cta-btn:not(:disabled):hover  { filter: brightness(1.07); }
+        .cta-btn:not(:disabled):active { transform: scale(0.98); }
+        .cta-btn:disabled { background: var(--surface-2); color: var(--text-muted); cursor: not-allowed; }
+        .cta-main  { font-size: 15px; font-weight: 700; }
+        .cta-hint  { font-size: 12px; opacity: 0.82; font-weight: 500; margin-top: 2px; }
+        .cta-arrow { font-size: 18px; flex-shrink: 0; }
+
+        /* Toast — bottom center, always visible */
         .toast {
             position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: white;
-            border-radius: 16px;
-            padding: 16px 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-            max-width: 320px;
-            width: calc(100% - 40px);
-            text-align: center;
-            font-weight: 600;
-            font-size: 15px;
+            bottom: 96px; left: 50%;
+            transform: translateX(-50%) translateY(16px);
+            opacity: 0;
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: var(--r); padding: 13px 20px; box-shadow: var(--shadow-lg);
+            z-index: 999;
+            max-width: min(340px, calc(100vw - 32px)); width: max-content;
+            text-align: center; font-weight: 600; font-size: 14px;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
         }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: var(--accent-2); color: var(--accent-2); }
+        .toast.error   { border-color: var(--danger);   color: var(--danger);   }
+        .toast.warning { border-color: var(--accent);   color: var(--accent);   }
+        @media (min-width: 800px) { .toast { bottom: 32px; } }
 
-        .toast.show { transform: translateX(-50%) translateY(0); }
-        .toast.success { border-left: 4px solid #2ed573; color: #2ed573; }
-        .toast.error { border-left: 4px solid #ff4757; color: #ff4757; }
-        .toast.warning { border-left: 4px solid #ffa502; color: #ffa502; }
-
-        .optional-tag {
-            font-size: 11px;
-            color: #999;
-            font-weight: 400;
-            text-transform: none;
-            letter-spacing: 0;
-            margin-left: 4px;
+        /* Success screen */
+        .success-screen { display: none; text-align: center; padding: 48px 24px; }
+        .success-screen.show { display: block; }
+        .success-icon     { font-size: 60px; margin-bottom: 14px; }
+        .success-title    { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .success-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; }
+        .success-vk-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 24px; background: var(--accent-soft); color: var(--accent);
+            border-radius: var(--r); font-weight: 700; font-size: 15px; text-decoration: none;
         }
+        .new-btn {
+            display: block; width: 100%; padding: 14px;
+            background: var(--surface-2); border: none; border-radius: var(--r);
+            font-size: 15px; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; font-family: inherit; margin-top: 10px;
+            transition: background 0.15s;
+        }
+        .new-btn:hover { background: var(--border); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📦 Передам Посылку</h1>
-        <p class="subtitle">Бесплатная передача посылок попутчиками</p>
 
-        <form id="submissionForm">
-            <div class="form-group">
-                <label class="required">Тип заявки</label>
-                <select name="type" id="type" required>
-                    <option value="">— Выберите тип —</option>
-                    <option value="Могу передать">📦 Могу передать</option>
-                    <option value="Нужно передать">🔍 Нужно передать</option>
-                </select>
-            </div>
+<header class="app-header">
+    <div class="app-logo">📦 Передам Посылку</div>
+    <div class="app-subtitle">Найди попутчика для посылки — бесплатно</div>
+</header>
 
-            <div class="form-group">
-                <label class="required">Откуда</label>
-                <div class="city-wrapper">
-                    <input type="text" name="from_city" id="from_city" placeholder="Введите город отправления" autocomplete="off" required>
-                    <div class="city-dropdown" id="from_city_dropdown"></div>
+<div class="layout">
+
+    <main>
+        <!-- Success screen -->
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon">✅</div>
+            <div class="success-title">Заявка опубликована!</div>
+            <div class="success-subtitle" id="successMsg">Ваша заявка появилась в группе ВКонтакте</div>
+            <a id="postLink" href="#" target="_blank" class="success-vk-link" style="display:none">🔗 Посмотреть пост в ВК</a>
+            <button class="new-btn" onclick="resetForm()">+ Создать ещё одну заявку</button>
+        </div>
+
+        <div id="formWrap">
+            <!-- Type -->
+            <div class="section">
+                <div class="slabel">Что вы хотите сделать?</div>
+                <div class="type-cards">
+                    <div class="type-card" id="card-offer" onclick="selectType('offer')">
+                        <span class="tc-icon">📦</span>
+                        <div class="tc-title">Могу передать</div>
+                        <div class="tc-desc">Еду и возьму посылку</div>
+                    </div>
+                    <div class="type-card" id="card-request" onclick="selectType('request')">
+                        <span class="tc-icon">🔍</span>
+                        <div class="tc-title">Нужно передать</div>
+                        <div class="tc-desc">Ищу попутчика</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="required">Куда</label>
-                <div class="city-wrapper">
-                    <input type="text" name="to_city" id="to_city" placeholder="Введите город назначения" autocomplete="off" required>
-                    <div class="city-dropdown" id="to_city_dropdown"></div>
+            <!-- Route -->
+            <div class="section">
+                <div class="slabel">Маршрут</div>
+                <div class="route-card">
+                    <div class="route-row">
+                        <div class="rdot from"></div>
+                        <div class="rinput-wrap">
+                            <input class="rinput" id="from_city" placeholder="Откуда" autocomplete="off">
+                            <button class="rclear" onclick="clearCity('from')">✕</button>
+                            <div class="cdropdown" id="from_drop"></div>
+                        </div>
+                    </div>
+                    <div class="rline-wrap">
+                        <div class="rline"></div>
+                        <button class="swap-btn" id="swapBtn" onclick="swapCities()">⇅</button>
+                    </div>
+                    <div class="route-row">
+                        <div class="rdot to"></div>
+                        <div class="rinput-wrap">
+                            <input class="rinput" id="to_city" placeholder="Куда" autocomplete="off">
+                            <button class="rclear" onclick="clearCity('to')">✕</button>
+                            <div class="cdropdown" id="to_drop"></div>
+                        </div>
+                    </div>
+                    <div class="quick-cities" id="quickCities"></div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Дата <span class="optional-tag">(необязательно)</span></label>
-                <input type="date" name="date" id="date">
-            </div>
-
-            <div class="form-group">
-                <label class="required">Что передать</label>
-                <select name="what" id="what" required>
-                    <option value="">— Выберите категорию —</option>
-                    <option value="Посылка">📦 Посылка</option>
-                    <option value="Документы">📄 Документы</option>
-                    <option value="Животные">🐾 Животные</option>
-                    <option value="Вещи">🎒 Вещи</option>
-                    <option value="Другое">📮 Другое</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Вес / габариты <span class="optional-tag">(необязательно)</span></label>
-                <input type="text" name="weight" id="weight" placeholder="Например: 2 кг, небольшая коробка">
-            </div>
-
-            <div class="form-group">
-                <label>Комментарий <span class="optional-tag">(необязательно)</span></label>
-                <textarea name="comment" id="comment" placeholder="Дополнительная информация..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Контакт <span class="optional-tag">(необязательно)</span></label>
-                <input type="text" name="contact" id="contact" placeholder="Телефон, Telegram или ВК">
-            </div>
-
-            <div class="form-group">
-                <label>Фото <span class="optional-tag">(необязательно)</span></label>
-                <div class="photo-upload">
-                    <label class="photo-upload-label" for="photos">
-                        <span class="photo-icon">📷</span>
-                        <span class="photo-upload-text">Нажмите чтобы добавить фото</span>
-                        <span class="photo-upload-hint">JPG, PNG до 5 МБ · не обязательно</span>
-                    </label>
-                    <input type="file" id="photos" name="photos" accept="image/*" multiple>
+            <!-- Category -->
+            <div class="section">
+                <div class="slabel">Что передать</div>
+                <div class="cat-chips">
+                    <div class="cchip" data-v="Посылка"   onclick="selectCat(this)"><span class="cchip-icon">📦</span><span class="cchip-label">Посылка</span></div>
+                    <div class="cchip" data-v="Документы" onclick="selectCat(this)"><span class="cchip-icon">📄</span><span class="cchip-label">Документы</span></div>
+                    <div class="cchip" data-v="Животные"  onclick="selectCat(this)"><span class="cchip-icon">🐾</span><span class="cchip-label">Животные</span></div>
+                    <div class="cchip" data-v="Вещи"      onclick="selectCat(this)"><span class="cchip-icon">👕</span><span class="cchip-label">Вещи</span></div>
+                    <div class="cchip" data-v="Другое"    onclick="selectCat(this)"><span class="cchip-icon">📮</span><span class="cchip-label">Другое</span></div>
                 </div>
-                <div class="photo-preview" id="photoPreview"></div>
             </div>
 
-            <button type="submit" class="submit-btn" id="submitBtn">Отправить заявку</button>
-        </form>
-    </div>
+            <!-- Contact -->
+            <div class="section">
+                <div class="slabel">Как с вами связаться</div>
+                <div class="contact-card">
+                    <input class="field-input" id="contact" placeholder="@telegram, +7…, vk.com/id…" oninput="syncPreview()">
+                    <div class="field-helper">Оставьте пустым — напишут в ВКонтакте напрямую</div>
+                </div>
+            </div>
 
-    <div class="toast" id="toast"></div>
+            <!-- Optional accordion -->
+            <div class="section">
+                <div class="accordion" id="optAcc">
+                    <button class="acc-toggle" onclick="this.closest('.accordion').classList.toggle('open')">
+                        <span>Дополнительно — дата, вес, комментарий</span>
+                        <span class="acc-arrow">▼</span>
+                    </button>
+                    <div class="acc-body">
+                        <label class="acc-label">Дата поездки <span style="font-weight:400">(необязательно)</span></label>
+                        <input class="field-input" type="date" id="date" oninput="syncPreview()">
+                        <label class="acc-label">Вес / габариты <span style="font-weight:400">(необязательно)</span></label>
+                        <input class="field-input" id="weight" placeholder="напр. 2 кг, небольшая коробка" oninput="syncPreview()">
+                        <label class="acc-label">Комментарий <span style="font-weight:400">(необязательно)</span></label>
+                        <textarea class="field-textarea" id="comment" placeholder="Дополнительная информация…" oninput="syncPreview()"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <script>
-        // ====== CONFIG ======
-        // ВАЖНО: замените на актуальный URL вашего backend/туннеля
-        const API_URL = 'https://organizations-builds-nicole-nokia.trycloudflare.com';
-        // ====================
+    <!-- Desktop preview -->
+    <aside class="preview-col">
+        <div class="preview-card">
+            <div class="slabel">Предпросмотр поста в ВК</div>
+            <div class="preview-post" id="previewPost"><span class="preview-placeholder">Заполните форму — здесь появится предпросмотр того, что увидят люди в ВКонтакте</span></div>
+        </div>
+        <button class="cta-btn" id="ctaDesktop" disabled onclick="doSubmit()">
+            <div>
+                <div class="cta-main">Опубликовать заявку</div>
+                <div class="cta-hint" id="hintDesktop">Выберите тип и маршрут</div>
+            </div>
+            <span class="cta-arrow">→</span>
+        </button>
+    </aside>
 
-        let vkUserId = null;
+</div>
 
-        // VK Bridge init
+<!-- Mobile sticky CTA -->
+<div class="sticky-cta">
+    <button class="cta-btn" id="ctaMobile" disabled onclick="doSubmit()">
+        <div>
+            <div class="cta-main">Опубликовать заявку</div>
+            <div class="cta-hint" id="hintMobile">Выберите тип и маршрут</div>
+        </div>
+        <span class="cta-arrow">→</span>
+    </button>
+</div>
+
+<!-- Toast: bottom-center, always on screen without scrolling -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const API_URL = 'https://organizations-builds-nicole-nokia.trycloudflare.com';
+    const POPULAR = ['Москва','Санкт-Петербург','Казань','Новосибирск','Екатеринбург','Краснодар','Уфа','Омск'];
+
+    let selType = null, selCat = null, vkUid = null;
+    let cities = [], lastFocused = 'from_city';
+
+    // VK Bridge
+    try {
+        vkBridge.send('VKWebAppInit');
+        vkBridge.send('VKWebAppGetUserInfo').then(d => { vkUid = d.id; }).catch(() => {});
+    } catch(e) {}
+
+    // Load cities once from static JSON (no API round-trip for autocomplete)
+    fetch('cities.json').then(r => r.ok ? r.json() : []).then(d => { cities = d; }).catch(() => {});
+
+    // Quick city chips
+    const qcEl = document.getElementById('quickCities');
+    POPULAR.forEach(city => {
+        const s = document.createElement('span');
+        s.className = 'qcity';
+        s.textContent = city;
+        s.onclick = () => {
+            const f = document.getElementById('from_city');
+            const t = document.getElementById('to_city');
+            if (!f.value)      { f.value = city; }
+            else if (!t.value) { t.value = city; }
+            else               { document.getElementById(lastFocused).value = city; }
+            syncPreview(); updateCTA();
+        };
+        qcEl.appendChild(s);
+    });
+
+    // Client-side city search
+    function searchCities(q) {
+        if (!q) return [];
+        const ql = q.toLowerCase();
+        const pref = cities.filter(c => c.toLowerCase().startsWith(ql));
+        const sub  = cities.filter(c => c.toLowerCase().includes(ql) && !c.toLowerCase().startsWith(ql));
+        return [...pref, ...sub].slice(0, 12);
+    }
+
+    function setupCity(inputId, dropId) {
+        const input = document.getElementById(inputId);
+        const drop  = document.getElementById(dropId);
+        input.addEventListener('focus', () => { lastFocused = inputId; });
+        input.addEventListener('input', () => {
+            const q = input.value.trim();
+            if (q.length < 1) { drop.classList.remove('open'); return; }
+            renderDrop(searchCities(q), drop, input);
+        });
+        input.addEventListener('blur', () => {
+            setTimeout(() => drop.classList.remove('open'), 180);
+            syncPreview(); updateCTA();
+        });
+    }
+
+    function renderDrop(res, drop, input) {
+        if (!res.length) { drop.classList.remove('open'); return; }
+        drop.innerHTML = '';
+        res.forEach(city => {
+            const d = document.createElement('div');
+            d.className = 'coption';
+            d.textContent = city;
+            d.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                input.value = city;
+                drop.classList.remove('open');
+                syncPreview(); updateCTA();
+            });
+            drop.appendChild(d);
+        });
+        drop.classList.add('open');
+    }
+
+    setupCity('from_city', 'from_drop');
+    setupCity('to_city',   'to_drop');
+
+    function clearCity(which) {
+        document.getElementById(which + '_city').value = '';
+        document.getElementById(which + '_drop').classList.remove('open');
+        syncPreview(); updateCTA();
+    }
+
+    function swapCities() {
+        const f = document.getElementById('from_city');
+        const t = document.getElementById('to_city');
+        [f.value, t.value] = [t.value, f.value];
+        const btn = document.getElementById('swapBtn');
+        btn.classList.add('spin');
+        setTimeout(() => btn.classList.remove('spin'), 300);
+        syncPreview(); updateCTA();
+    }
+
+    function selectType(type) {
+        selType = type;
+        document.getElementById('card-offer').className   = 'type-card' + (type === 'offer'   ? ' sel-offer'   : '');
+        document.getElementById('card-request').className = 'type-card' + (type === 'request' ? ' sel-request' : '');
+        syncPreview(); updateCTA();
+        try { vkBridge.send('VKWebAppTapticImpactOccurred', { style: 'light' }); } catch(e) {}
+    }
+
+    function selectCat(el) {
+        document.querySelectorAll('.cchip').forEach(c => c.classList.remove('sel'));
+        el.classList.add('sel');
+        selCat = el.dataset.v;
+        syncPreview(); updateCTA();
+    }
+
+    function updateCTA() {
+        const from = document.getElementById('from_city').value.trim();
+        const to   = document.getElementById('to_city').value.trim();
+        const ok   = !!(selType && from && to && selCat);
+        ['ctaMobile','ctaDesktop'].forEach(id => { document.getElementById(id).disabled = !ok; });
+        const hint = ok ? `${from} → ${to} · ${selCat}`
+            : !selType   ? 'Выберите тип заявки'
+            : (!from||!to)? 'Укажите маршрут'
+            : 'Выберите категорию';
+        document.getElementById('hintMobile').textContent  = hint;
+        document.getElementById('hintDesktop').textContent = hint;
+    }
+
+    function syncPreview() {
+        const from    = document.getElementById('from_city').value.trim();
+        const to      = document.getElementById('to_city').value.trim();
+        const date    = document.getElementById('date').value;
+        const weight  = document.getElementById('weight').value.trim();
+        const comment = document.getElementById('comment').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+        const preview = document.getElementById('previewPost');
+
+        if (!selType && !from && !to) {
+            preview.innerHTML = '<span class="preview-placeholder">Заполните форму — здесь появится предпросмотр того, что увидят люди в ВКонтакте</span>';
+            return;
+        }
+
+        const typeLabel = selType === 'offer' ? 'МОГУ ПЕРЕДАТЬ' : 'НУЖНО ПЕРЕДАТЬ';
+        const typeEmoji = selType === 'offer' ? '📦' : '🔍';
+        const catEmoji  = {Посылка:'📦',Документы:'📄',Животные:'🐾',Вещи:'👕',Другое:'📮'}[selCat] || '📮';
+
+        const lines = [`${typeEmoji} ${typeLabel}`, '━━━━━━━━━━━━━'];
+        if (from || to) lines.push(`📍 ${from||'?'} → ${to||'?'}`);
+        if (date) {
+            try { lines.push('📅 ' + new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})); } catch(e){}
+        }
+        if (selCat) lines.push(`${catEmoji} ${selCat}`);
+        if (weight) lines.push(`⚖️ ${weight}`);
+        if (comment) lines.push('', `💬 ${comment}`);
+        if (contact) lines.push('', `✉️ ${contact}`);
+        else if (vkUid) lines.push('', `👤 @id${vkUid}`);
+        lines.push('', '━━━━━━━━━━━━━');
+        const tags = ['#передампосылку'];
+        if (from) tags.push('#' + from.replace(/\s/g,''));
+        if (to && to !== from) tags.push('#' + to.replace(/\s/g,''));
+        lines.push(tags.join(' '));
+
+        preview.textContent = lines.join('\n');
+        updateCTA();
+    }
+
+    async function doSubmit() {
+        const from    = document.getElementById('from_city').value.trim();
+        const to      = document.getElementById('to_city').value.trim();
+        const date    = document.getElementById('date').value;
+        const weight  = document.getElementById('weight').value.trim();
+        const comment = document.getElementById('comment').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+
+        setLoading(true);
         try {
-            vkBridge.send('VKWebAppInit');
-            vkBridge.send('VKWebAppGetUserInfo').then(data => {
-                vkUserId = data.id;
-            }).catch(() => {});
-        } catch(e) {}
+            const fd = new FormData();
+            fd.append('type',      selType === 'offer' ? 'Могу передать' : 'Нужно передать');
+            fd.append('from_city', from);
+            fd.append('to_city',   to);
+            fd.append('what',      selCat);
+            if (date)    fd.append('date',    date);
+            if (weight)  fd.append('weight',  weight);
+            if (comment) fd.append('comment', comment);
+            if (contact) fd.append('contact', contact);
+            if (vkUid)   fd.append('vk_user_id', String(vkUid));
 
-        // Toast
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            setTimeout(() => toast.classList.add('show'), 50);
-            setTimeout(() => toast.classList.remove('show'), 3500);
-        }
+            const r   = await fetch(`${API_URL}/api/submit`, { method: 'POST', body: fd });
+            const res = await r.json();
 
-        // City autocomplete
-        const cityInputs = ['from_city', 'to_city'];
-        const cityTimers = {};
-
-        cityInputs.forEach(fieldId => {
-            const input = document.getElementById(fieldId);
-            const dropdown = document.getElementById(`${fieldId}_dropdown`);
-
-            input.addEventListener('input', () => {
-                clearTimeout(cityTimers[fieldId]);
-                const q = input.value.trim();
-                if (q.length < 1) { dropdown.classList.remove('open'); return; }
-
-                cityTimers[fieldId] = setTimeout(() => fetchCities(q, fieldId), 200);
-            });
-
-            input.addEventListener('blur', () => {
-                setTimeout(() => dropdown.classList.remove('open'), 200);
-            });
-        });
-
-        async function fetchCities(q, fieldId) {
-            try {
-                const res = await fetch(`${API_URL}/api/cities?q=${encodeURIComponent(q)}&_=${Date.now()}`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
-                });
-                if (!res.ok) return;
-                const data = await res.json();
-                showCityDropdown(data.cities, fieldId);
-            } catch(e) {}
-        }
-
-        function showCityDropdown(cities, fieldId) {
-            const dropdown = document.getElementById(`${fieldId}_dropdown`);
-            const input = document.getElementById(fieldId);
-            if (!cities || cities.length === 0) { dropdown.classList.remove('open'); return; }
-
-            dropdown.innerHTML = '';
-            cities.forEach(city => {
-                const div = document.createElement('div');
-                div.className = 'city-option';
-                div.textContent = city;
-                div.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    input.value = city;
-                    dropdown.classList.remove('open');
-                });
-                dropdown.appendChild(div);
-            });
-            dropdown.classList.add('open');
-        }
-
-        // Photo upload
-        const photoInput = document.getElementById('photos');
-        const photoPreview = document.getElementById('photoPreview');
-        let selectedFiles = [];
-
-        photoInput.addEventListener('change', () => {
-            Array.from(photoInput.files).forEach(file => {
-                if (selectedFiles.length >= 3) return;
-                selectedFiles.push(file);
-            });
-            renderPreviews();
-            photoInput.value = '';
-        });
-
-        function renderPreviews() {
-            photoPreview.innerHTML = '';
-            selectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const item = document.createElement('div');
-                    item.className = 'photo-preview-item';
-                    item.innerHTML = `
-                        <img src="${e.target.result}" alt="Фото ${index+1}">
-                        <button class="photo-remove" data-index="${index}">×</button>
-                    `;
-                    item.querySelector('.photo-remove').addEventListener('click', () => {
-                        selectedFiles.splice(index, 1);
-                        renderPreviews();
-                    });
-                    photoPreview.appendChild(item);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Form submit
-        document.getElementById('submissionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Отправляем...';
-
-            try {
-                const form = e.target;
-                const formData = new FormData();
-
-                formData.append('type', form.type.value);
-                formData.append('from_city', form.from_city.value.trim());
-                formData.append('to_city', form.to_city.value.trim());
-                if (form.date.value) formData.append('date', form.date.value);
-                formData.append('what', form.what.value);
-                if (form.weight.value) formData.append('weight', form.weight.value.trim());
-                if (form.comment.value) formData.append('comment', form.comment.value.trim());
-                if (form.contact.value) formData.append('contact', form.contact.value.trim());
-                if (vkUserId) formData.append('vk_user_id', vkUserId);
-
-                selectedFiles.forEach(file => formData.append('photos', file));
-
-                const response = await fetch(`${API_URL}/api/submit`, {
-                    method: 'POST',
-                    headers: { 'ngrok-skip-browser-warning': 'true' },
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    showToast('✅ Заявка успешно опубликована!', 'success');
-                    form.reset();
-                    selectedFiles = [];
-                    photoPreview.innerHTML = '';
-                } else if (result.status === 'manual') {
-                    showToast('⏳ Заявка отправлена на модерацию', 'warning');
-                    form.reset();
-                    selectedFiles = [];
-                    photoPreview.innerHTML = '';
-                } else {
-                    showToast(result.message || 'Ошибка. Попробуйте ещё раз.', 'error');
-                }
-
-            } catch (error) {
-                showToast('Ошибка соединения. Проверьте интернет.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Отправить заявку';
+            if (res.status === 'success') {
+                showSuccess(res.post_id);
+            } else if (res.status === 'manual') {
+                showToast('⏳ Заявка отправлена на модерацию', 'warning');
+                resetForm();
+            } else {
+                showToast(res.message || 'Ошибка. Попробуйте ещё раз.', 'error');
+                setLoading(false);
             }
+        } catch(e) {
+            showToast('Ошибка соединения. Проверьте интернет.', 'error');
+            setLoading(false);
+        }
+    }
+
+    function setLoading(on) {
+        ['ctaMobile','ctaDesktop'].forEach(id => {
+            const btn = document.getElementById(id);
+            btn.disabled = on;
+            btn.querySelector('.cta-main').textContent = on ? 'Публикуем…' : 'Опубликовать заявку';
         });
-    </script>
+    }
+
+    function showSuccess(postId) {
+        document.getElementById('formWrap').style.display = 'none';
+        document.getElementById('successScreen').classList.add('show');
+        document.querySelector('.sticky-cta').style.display = 'none';
+        document.getElementById('ctaDesktop').style.display = 'none';
+
+        if (postId) {
+            const link = document.getElementById('postLink');
+            link.href = `https://vk.com/wall-47570832_${postId}`;
+            link.style.display = 'inline-flex';
+        }
+        document.getElementById('successMsg').textContent =
+            postId ? 'Ваша заявка опубликована в группе ВКонтакте' : 'Заявка отправлена на проверку';
+
+        try { vkBridge.send('VKWebAppTapticNotificationOccurred', { type: 'success' }); } catch(e) {}
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        selType = null; selCat = null;
+        document.getElementById('card-offer').className   = 'type-card';
+        document.getElementById('card-request').className = 'type-card';
+        document.querySelectorAll('.cchip').forEach(c => c.classList.remove('sel'));
+        ['from_city','to_city','date','weight','comment','contact'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('formWrap').style.display = '';
+        document.getElementById('successScreen').classList.remove('show');
+        document.querySelector('.sticky-cta').style.display = '';
+        document.getElementById('ctaDesktop').style.display = '';
+        syncPreview(); updateCTA();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Toast — bottom center, always in viewport
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        clearTimeout(t._t);
+        t._t = setTimeout(() => t.classList.remove('show'), 3800);
+    }
+
+    updateCTA();
+</script>
 </body>
 </html>
