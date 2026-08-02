@@ -680,7 +680,7 @@
     const API_URL = 'https://organizations-builds-nicole-nokia.trycloudflare.com';
     const POPULAR = ['Москва','Санкт-Петербург','Казань','Новосибирск','Екатеринбург','Краснодар','Уфа','Омск'];
 
-    let selType = null, selCat = null, vkUid = null;
+    let selType = null, selCat = null, vkUid = null, _submitInFlight = false;
     let cities = [], lastFocused = 'from_city';
 
     try {
@@ -788,7 +788,7 @@
         const from = document.getElementById('from_city').value.trim();
         const to   = document.getElementById('to_city').value.trim();
         const ok   = !!(selType && from && to && selCat);
-        ['ctaMobile','ctaDesktop'].forEach(id => { document.getElementById(id).disabled = !ok; });
+        ['ctaMobile','ctaDesktop'].forEach(id => { document.getElementById(id).disabled = !ok || _submitInFlight; });
         const hint = ok           ? `${from} → ${to} · ${selCat}`
             : !selType            ? 'Выберите тип заявки'
             : (!from || !to)      ? 'Укажите маршрут'
@@ -836,6 +836,7 @@
     }
 
     async function doSubmit() {
+        if (_submitInFlight) return;
         const from    = document.getElementById('from_city').value.trim();
         const to      = document.getElementById('to_city').value.trim();
         const date    = document.getElementById('date').value;
@@ -843,6 +844,7 @@
         const comment = document.getElementById('comment').value.trim();
         const contact = document.getElementById('contact').value.trim();
 
+        _submitInFlight = true;
         setLoading(true);
         try {
             const fd = new FormData();
@@ -866,14 +868,20 @@
                 resetForm();
             } else if (res.status === 'cooldown') {
                 showCooldown(res.message, res.wait_minutes);
+                _submitInFlight = false;
                 setLoading(false);
             } else {
                 showToast(res.message || 'Ошибка. Попробуйте ещё раз.', 'error');
+                _submitInFlight = false;
                 setLoading(false);
             }
         } catch(e) {
-            showToast('Ошибка соединения. Проверьте интернет.', 'error');
-            setLoading(false);
+            // Network error: keep button locked — post may have gone through on the server.
+            ['ctaMobile','ctaDesktop'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.querySelector('.cta-main').textContent = 'Обновите страницу';
+            });
+            showToast('Ошибка соединения. Проверьте группу ВКонтакте — заявка могла уже быть опубликована. Для повторной отправки обновите страницу.', 'error');
         }
     }
 
